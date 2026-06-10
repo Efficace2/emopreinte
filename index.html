@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Émopreinte - votre empreinte émotionnelle</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%2348235C%22/%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2220%22%20r%3D%228%22%20fill%3D%22%23e94e1b%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2248%22%20font-family%3D%22Open%20Sans%2CArial%2Csans-serif%22%20font-size%3D%2234%22%20font-weight%3D%22800%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%C3%A9%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --violet:#48235C; --violet-mid:#8e5fa8; --violet-soft:#efe9f3;
+  --orange:#e94e1b; --gris:#6f6b78; --gris-soft:#f4f3f6;
+  --ink:#2c2433; --line:#e4e0e8; --bg:#faf9fb;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Open Sans',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:840px;margin:0 auto;padding:0 20px 64px}
+.topbar{background:var(--violet);padding:16px 20px;display:flex;align-items:center;gap:14px}
+.topbar svg{height:30px;width:auto}
+.topbar .bl{color:#fff;opacity:.85;font-size:12.5px;letter-spacing:.04em;font-weight:600}
+h1{font-size:26px;line-height:1.2;margin:28px 0 6px;color:var(--violet);font-weight:800}
+h2{font-size:19px;color:var(--violet);font-weight:800;margin:34px 0 10px}
+h3{font-size:15.5px;font-weight:700;margin:18px 0 6px}
+p.lead{font-size:16px;color:#4a4254;margin:6px 0 18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin:16px 0;
+  box-shadow:0 1px 2px rgba(72,35,92,.04)}
+.btn{appearance:none;border:0;border-radius:10px;padding:13px 22px;font-family:inherit;font-size:15px;
+  font-weight:700;cursor:pointer;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-primary:hover{filter:brightness(.95)}
+.btn-violet{background:var(--violet);color:#fff}
+.btn-violet:hover{filter:brightness(1.1)}
+.btn-ghost{background:#fff;color:var(--violet);border:1.5px solid var(--violet)}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.choice-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+@media(max-width:560px){.choice-cards{grid-template-columns:1fr}}
+.choice{border:1.5px solid var(--line);border-radius:14px;padding:22px;cursor:pointer;background:#fff;text-align:left;transition:.15s}
+.choice:hover{border-color:var(--violet);box-shadow:0 4px 14px rgba(72,35,92,.08)}
+.choice .ic{font-size:26px}
+.choice b{display:block;color:var(--violet);font-size:16px;margin:8px 0 4px;font-weight:800}
+.choice span{color:#6a6175;font-size:13.5px}
+/* quiz */
+.scale-head{display:flex;align-items:center;gap:10px;margin:30px 0 6px}
+.scale-dot{width:14px;height:14px;border-radius:4px;flex:0 0 auto}
+.scale-head b{font-size:17px;font-weight:800}
+.qitem{padding:16px 0;border-bottom:1px solid var(--line)}
+.qitem:last-child{border-bottom:0}
+.qtext{font-size:15px;margin-bottom:10px}
+.scale-row{display:flex;gap:7px;flex-wrap:wrap}
+.opt{flex:1 1 0;min-width:64px;border:1.5px solid var(--line);background:#fff;border-radius:9px;
+  padding:9px 4px;text-align:center;cursor:pointer;font-size:11.5px;color:#6a6175;line-height:1.25;transition:.12s}
+.opt b{display:block;font-size:15px;color:var(--ink);margin-bottom:2px}
+.opt:hover{border-color:var(--violet-mid)}
+.opt.sel{background:var(--violet);border-color:var(--violet);color:#fff}
+.opt.sel b{color:#fff}
+.progress{position:sticky;top:0;background:var(--bg);padding:12px 0;z-index:5;border-bottom:1px solid var(--line)}
+.pbar{height:8px;background:var(--violet-soft);border-radius:6px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--orange);width:0;transition:.25s}
+.pcount{font-size:13px;color:#6a6175;margin-top:6px}
+/* code result */
+.codebox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:21px;font-weight:700;letter-spacing:.06em;
+  color:var(--violet);background:var(--violet-soft);border:1.5px dashed var(--violet-mid);border-radius:12px;
+  padding:18px;text-align:center;word-break:break-all}
+textarea{width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px;padding:12px;
+  border:1.5px solid var(--line);border-radius:10px;resize:vertical;min-height:70px}
+input.txt{font-family:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;width:100%}
+.field{margin:12px 0}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--violet);margin-bottom:5px}
+.err{color:var(--orange);font-weight:700;font-size:14px;margin-top:8px}
+/* report */
+.report-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+  border-bottom:3px solid var(--orange);padding-bottom:14px;margin-bottom:6px}
+.report-head svg{height:34px}
+.report-head .meta{text-align:right;font-size:13px;color:#6a6175}
+.report-head .meta b{color:var(--violet);font-size:15px}
+.global{display:flex;align-items:center;gap:18px;background:var(--violet);color:#fff;border-radius:14px;padding:18px 22px;margin:18px 0}
+.global .num{font-size:40px;font-weight:800;line-height:1}
+.global .lbl{font-size:13px;opacity:.85}
+.global .bd{font-size:18px;font-weight:800}
+.radar{width:100%;height:auto;display:block;margin:6px auto}
+.genrow{padding:12px 0;border-bottom:1px solid var(--line)}
+.genrow:last-child{border-bottom:0}
+.genrow .gh{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+.genrow .gh b{font-weight:800}
+.genrow .gh .pill{margin-left:auto;font-size:12px;font-weight:700;color:#fff;border-radius:20px;padding:3px 11px}
+.bars .bgroup{margin:14px 0}
+.bars .bgh{font-weight:800;font-size:14px;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.bar{display:grid;grid-template-columns:1fr;gap:3px;margin:7px 0}
+.bar .bl{font-size:13px;color:#4a4254}
+.bar .track{height:16px;background:var(--gris-soft);border-radius:8px;position:relative;overflow:hidden}
+.bar .fill{height:100%;border-radius:8px}
+.bar .bv{font-size:12px;font-weight:700;color:#6a6175;margin-left:6px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.tag{font-size:12.5px;font-weight:700;border-radius:8px;padding:10px 12px;margin:8px 0;
+  display:flex;gap:9px;align-items:flex-start}
+.tag.f{background:#f1f7ef;border-left:4px solid #5a8f3c}
+.tag.a{background:#fff3ec;border-left:4px solid var(--orange)}
+.tag .nm{color:var(--violet);font-weight:800;white-space:nowrap}
+.actions-list{margin:6px 0 2px;padding-left:18px}
+.actions-list li{margin:4px 0;font-size:13.5px}
+[contenteditable=true]:focus{outline:2px solid var(--violet-mid);outline-offset:2px;border-radius:4px}
+.foot-note{font-size:11.5px;color:#8a8295;margin-top:26px;border-top:1px solid var(--line);padding-top:12px}
+.hint{font-size:13px;color:#8a8295;margin-top:6px}
+.facet-act{padding:8px 0 6px;border-bottom:1px solid var(--line)}
+.facet-act:last-child{border-bottom:0}
+.facet-act.prio{background:#fff6f1;border-left:3px solid var(--orange);padding:8px 10px;border-radius:0 8px 8px 0;margin:6px 0;border-bottom:0}
+.fa-head{display:flex;align-items:center;gap:8px;font-size:14px;flex-wrap:wrap}
+.fa-head b{color:var(--ink);font-weight:800}
+.prio-badge{margin-left:auto;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--orange);border-radius:20px;padding:2px 9px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg-btn{flex:1 1 0;min-width:150px;border:1.5px solid var(--line);background:#fff;border-radius:10px;
+  padding:12px;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;transition:.12s}
+.seg-btn:hover{border-color:var(--violet-mid)}
+.seg-btn.sel{background:var(--violet);border-color:var(--violet);color:#fff}
+.tbrand{font-weight:800;color:#fff;font-size:15.5px;letter-spacing:.01em}
+.tbrand .o{color:#e94e1b}
+.brandtitle{font-size:34px;font-weight:800;color:var(--violet);margin:26px 0 4px;letter-spacing:-.01em}
+.brandtitle .o{color:#e94e1b}
+.wheel-cap{font-size:12px;color:#8a8295;margin-top:6px;text-align:center}
+.cloture{background:var(--violet-soft);border-left:4px solid var(--violet);border-radius:0 10px 10px 0;
+  padding:14px 16px;margin:16px 0;font-size:14px;color:var(--ink);font-style:italic}
+.dim-legend{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin-top:6px}
+.dim-chip{font-size:12.5px;font-weight:700;color:var(--ink)}
+.dim-chip b{color:var(--violet)}
+.plan-row{display:grid;grid-template-columns:1fr 130px;gap:10px;border-bottom:1px solid var(--line);padding:9px 0;align-items:start}
+.plan-row:last-child{border-bottom:0}
+.plan-act,.plan-when{font-size:13.5px;min-height:20px}
+.plan-when{color:var(--violet);font-weight:700}
+[contenteditable][data-ph]:empty:before{content:attr(data-ph);color:#b7b1c0;font-weight:400}
+.hidden{display:none!important}
+@media print{
+  body{background:#fff}
+  .topbar,.no-print{display:none!important}
+  .wrap{max-width:100%;padding:0}
+  .card{border:0;box-shadow:none;padding:0;margin:10px 0}
+  .genrow,.bar,.tag{break-inside:avoid}
+  h2{break-after:avoid}
+  .global{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .bar .fill,.scale-dot,.pill,.tag,.prio-badge,.facet-act.prio{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .facet-act,.bgroup{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="topbar"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 595.28 198.43" xml:space="preserve">
+
+<g>
+	<path fill="#ffffff" d="M336.98,40.79c0,6.86-5.06,11.92-12.22,11.92c-6.86,0-11.92-4.91-11.92-11.63c0-6.86,5.21-11.92,12.36-11.92
+		C332.07,29.16,336.98,34.07,336.98,40.79"/>
+	<path fill="#ffffff" d="M51.24,122.71c5.19,0,9.35-2.08,9.35-5.8c0-3.57-4.16-5.04-12.46-9.07c-10.38-5.06-17.79-11.15-17.79-21.69
+		c0-13.97,11.72-23.18,25.8-23.18c9.35,0,19.14,3.42,25.65,11L69.76,85.7c-4.01-5.5-9.64-7.29-13.49-7.29
+		c-4.31,0-7.42,2.23-7.42,5.8c0,3.42,4.6,6.09,11.11,9.37c9.64,4.75,19.14,9.81,19.14,20.96c0.15,15.01-11.11,23.48-28.17,23.48
+		c-10.52,0-21.8-4.6-27.29-12.33l11.43-11.59C39.22,119.45,45.44,122.71,51.24,122.71"/>
+	<path fill="#ffffff" d="M140.82,92.57c0-6.55-3.13-12.64-9.51-12.64c-9.51,0-19.91,11.15-23.17,30.47l-0.59,4.6
+		c2.52,4.16,7.43,6.24,13.52,6.24C133.39,121.27,140.82,107.29,140.82,92.57 M160,92.57c0,24.23-14.55,45.48-35.51,45.48
+		c-7.29,0-13.67-1.78-18.42-5.94h-0.29l-3.5,27.75H83.42l11.81-95.55h18.86l-1.64,12.79h0.44c5.8-8.92,13.67-14.13,23.77-14.13
+		C152.12,62.98,160,76.67,160,92.57"/>
+	<path fill="#ffffff" d="M187.71,98.05c12.77-1.78,24.95-5.65,24.95-13.52c0-3.13-2.37-5.04-6.53-5.04
+		C198.84,79.49,190.37,85.43,187.71,98.05 M214.42,114.09l14.41,9.37c-8.02,9.51-16.49,14.55-30.58,14.55
+		c-18.42,0-29.84-11.3-29.84-30.6c0-23.48,14.26-44.42,38.9-44.42c12.03,0,23.75,6.83,23.75,20.2c0,17.68-21.09,26-43.35,28.83
+		l-0.29,0.29c1.78,6.38,6.97,9.37,12.03,9.37C205.22,121.68,209.67,119.45,214.42,114.09"/>
+	<path fill="#ffffff" d="M236.94,106.81c0-23.33,14.54-43.83,38.88-43.83c11.57,0,21.09,4.45,26.42,12.33l-14.54,11
+		c-2.96-4.6-7.56-6.24-12.62-6.24c-11.28,0-19.15,11.74-19.15,25.7c0,11.44,6.24,15.31,12.33,15.31c4.6,0,9.94-2.23,14.68-7.58
+		l14.7,9.95c-7.73,9.22-17.22,14.55-30.43,14.55C248.66,138.01,236.94,127.47,236.94,106.81"/>
+	<path fill="#ffffff" d="M414.43,93.14l-5.94,43.68h-18.73l5.5-41.16c1.34-10.25,0.15-15.6-5.21-15.6c-6.4,0-18.14,11.89-20.52,30.16
+		l-3.57,26.59h-18.73l5.5-41.16c1.34-10.25,0.29-15.6-5.21-15.6c-6.4,0-18.29,11.74-20.66,29.72l-3.28,27.05h-18.75l8.92-72.49
+		h18.73L331,75.9h0.29c6.7-8.61,14.87-12.92,23.79-12.92c8.92,0,14.43,4.01,16.5,12.47h0.44c6.7-8.32,14.87-12.47,24.99-12.47
+		C411.91,62.98,417.09,72.93,414.43,93.14"/>
+	<path fill="#ffffff" d="M477.32,87.8v0.44l0.29-1.78c-4.01-4.16-9.51-6.38-14.7-6.38c-11.59,0-18.27,14.85-18.27,27.93
+		c0,8.17,3.57,13.38,10.1,13.38C463.79,121.38,474.65,108.89,477.32,87.8 M498.7,64.32l-8.91,72.49h-18.86l1.64-13.67h-0.15
+		c-5.94,9.37-13.97,14.85-22.58,14.85c-16.49,0-24.36-13.08-24.36-29.57c0-24.07,14.55-45.47,35.05-45.47
+		c7.73,0,14.11,2.37,18.42,6.97h0.29l0.59-5.65h18.86V64.32z"/>
+	<path fill="#ffffff" d="M575.79,92.84l-5.8,43.98h-18.86l5.5-41.16c1.49-10.25,0.29-15.6-5.8-15.6c-8.02,0-19.74,11.74-22.13,29.72
+		l-3.26,27.05h-18.86l8.91-72.49h18.86l-1.49,11.74h0.29c6.97-8.61,15.58-13.08,25.24-13.08C573.12,62.98,578.48,72.79,575.79,92.84
+		"/>
+	<path fill="#ffffff" d="M292.34,47.69c-2.21,0-3.39-1.71-3.39-4.07c0-3.28,2.13-6.66,5.48-6.66c1.09,0,2.91,0.42,3.92,1.67l-0.28,2.19
+		C297.64,44.29,295.23,47.69,292.34,47.69 M298.73,35.73l-0.2,1.45h-0.04c-0.96-1.07-2.56-1.6-4.12-1.6c-4.2,0-6.94,3.96-6.94,8
+		c0,3.04,1.62,5.43,4.67,5.43c2.26,0,4.2-1.62,5.41-3.72h0.04l-0.26,2.1c-0.64,5.15-2.91,6.22-5.89,6.22
+		c-1.23,0-2.63-0.31-4.07-1.14l-0.48,1.38c1.4,0.75,2.85,1.14,4.47,1.14c3.66,0,6.61-1.36,7.36-7.47l1.45-11.79H298.73z
+		 M280.84,35.6c-2.08,0-4.27,1.29-5.78,3.48h-0.04l0.39-3.33h-1.45l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27
+		c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.17C284.73,37.28,283.49,35.6,280.84,35.6L280.84,35.6z M267.67,35.73
+		l-1.66,13.58h1.45l1.66-13.58H267.67z M269,30.45c-0.64,0-1.12,0.48-1.12,1.14c0,0.61,0.44,1.09,1.07,1.09
+		c0.68,0,1.14-0.5,1.14-1.14C270.08,30.91,269.6,30.45,269,30.45 M259.1,35.6c-2.04,0-4.23,1.29-5.78,3.44h-0.04l1.25-10.34h-1.45
+		l-2.52,20.61h1.45l0.74-6.05c0.64-3.53,3.55-6.31,5.96-6.31c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19
+		C263,37.28,261.76,35.6,259.1,35.6 M241.87,49.44c2.41,0,4.08-0.81,5.48-2.43l-1.14-0.85c-1.12,1.34-2.52,1.93-4.25,1.93
+		c-2.08,0-3.75-1.66-3.75-4.34c0-3.68,2.15-6.79,5.63-6.79c1.34,0,2.63,0.53,3.42,1.71l1.18-0.86c-1.01-1.51-2.78-2.21-4.56-2.21
+		c-4.45,0-7.14,3.81-7.14,8.24C236.72,47.51,239.1,49.44,241.87,49.44 M226.27,48.11c-2.21,0-3.39-1.71-3.39-4.07
+		c0-3.72,2.13-7.08,5.48-7.08c1.09,0,2.91,0.39,3.92,1.66l-0.28,2.21C231.55,44.69,229.16,48.11,226.27,48.11 M232.66,35.73
+		l-0.2,1.44h-0.06c-0.96-1.07-2.52-1.56-4.08-1.56c-4.2,0-6.94,3.96-6.94,8.43c0,3.02,1.62,5.43,4.67,5.43
+		c2.24,0,4.12-1.56,5.32-3.66h0.06l-0.44,3.53h1.45l1.66-13.58L232.66,35.73z M213.13,36.96c2.32,0,4.07,1.34,4.07,4.27
+		c0,4.01-2.3,6.86-5.56,6.86c-2.52,0-4.08-1.71-4.08-4.45C207.56,39.96,209.86,36.96,213.13,36.96 M213.19,35.6
+		c-4.4,0-7.12,3.83-7.12,8.19c0,3.61,2.17,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C218.71,37.55,216.46,35.6,213.19,35.6
+		 M202.81,46.13l-1.18-0.98c-1.62,1.84-3.86,2.83-5.89,2.83c-3.81,0-6.13-2.67-6.13-6.92c0-5.26,3.39-10.29,8.43-10.29
+		c2.26,0,4.01,1.03,5.5,3.64l1.34-0.9c-1.97-3.16-4.34-4.23-6.81-4.23c-5.94,0-10.05,5.52-10.05,11.79c0,5.3,3.11,8.37,7.64,8.37
+		C198.41,49.46,201.06,48.1,202.81,46.13 M167.85,35.6c-2.08,0-4.25,1.29-5.78,3.48h-0.04l0.39-3.33h-1.45l-1.66,13.58h1.45
+		l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.49l1.07-8.17
+		C171.75,37.28,170.52,35.6,167.85,35.6L167.85,35.6z M150.91,36.96c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86
+		c-2.52,0-4.08-1.71-4.08-4.45C145.33,39.96,147.63,36.96,150.91,36.96 M150.96,35.6c-4.4,0-7.12,3.83-7.12,8.19
+		c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C156.48,37.55,154.25,35.6,150.96,35.6 M139.41,35.73l-1.66,13.58h1.45
+		l1.66-13.58H139.41z M140.71,30.45c-0.64,0-1.12,0.48-1.12,1.14c0,0.61,0.44,1.09,1.07,1.09c0.66,0,1.14-0.5,1.14-1.14
+		C141.8,30.91,141.34,30.45,140.71,30.45 M134.24,47.1c-0.85,0.59-1.67,0.92-2.48,0.92c-1.31,0-1.51-1.03-1.34-2.56l1.03-8.46h4.34
+		l0.15-1.29h-4.34l0.63-4.97L130.72,31l-0.55,4.71h-1.62L128.4,37h1.6l-1.07,8.63c-0.28,2.26,0.31,3.81,2.43,3.81
+		c1.07,0,2.19-0.33,3.09-0.96L134.24,47.1z M117.77,48.11c-2.21,0-3.39-1.71-3.39-4.07c0-3.72,2.13-7.08,5.48-7.08
+		c1.09,0,2.91,0.39,3.92,1.66l-0.28,2.21C123.07,44.69,120.66,48.11,117.77,48.11 M124.15,35.73l-0.2,1.44h-0.06
+		c-0.96-1.07-2.52-1.56-4.08-1.56c-4.2,0-6.94,3.96-6.94,8.43c0,3.02,1.62,5.43,4.67,5.43c2.24,0,4.12-1.56,5.32-3.66h0.06
+		l-0.44,3.53h1.45l1.66-13.58L124.15,35.73z M106.45,35.6c-1.91,0-3.85,1.2-5.24,3.31h-0.02c-0.2-2.3-1.38-3.31-3.33-3.31
+		c-1.78,0-3.72,1.23-5.15,3.31h-0.06l0.39-3.16h-1.45l-1.66,13.58h1.45l0.74-6.07c0.63-3.5,3.33-6.27,5.41-6.27
+		c1.55,0,2.52,1.01,2.1,4.25l-1.07,8.1h1.45l0.85-6.24c0.66-3.42,3.22-6.11,5.26-6.11c1.55,0,2.56,1.01,2.13,4.25l-1.07,8.1h1.45
+		l1.09-8.17C110.24,37.28,109.01,35.6,106.45,35.6L106.45,35.6z M84.04,38.88h-0.07l0.39-3.13H82.9l-1.66,13.58h1.45l0.75-6.16
+		c0.53-3.26,2.43-5.58,5.04-5.83l0.22-1.73C86.88,35.93,85.22,37.06,84.04,38.88L84.04,38.88z M72.82,36.96
+		c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86c-2.52,0-4.08-1.71-4.08-4.45C67.24,39.96,69.52,36.96,72.82,36.96
+		 M72.87,35.6c-4.4,0-7.12,3.83-7.12,8.19c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C78.39,37.55,76.15,35.6,72.87,35.6
+		 M55.93,30.85h9.66l0.17-1.42H54.53L52.1,49.33h1.56l1.12-9h8.26l0.17-1.45h-8.28L55.93,30.85z"/>
+	<path fill="#ffffff" d="M539.95,149.88l-2.48,20.61h1.45l2.52-20.61H539.95z M530.82,158.14c1.03,0,2.69,0.42,2.69,1.99
+		c0,2.56-4.62,3.68-8.19,3.97C525.67,160.55,528.04,158.14,530.82,158.14 M529.22,169.26c-2.13,0-3.72-1.4-3.9-3.85
+		c4.34-0.39,9.66-1.78,9.66-5.37c0-2.47-2.52-3.28-4.08-3.28c-4.27,0-7.07,3.77-7.07,8.21c0,3.53,2.15,5.63,5.32,5.63
+		c2.19,0,3.74-0.86,5.1-2.43l-1.14-0.85C532,168.59,530.73,169.26,529.22,169.26 M517.22,156.76c-2.08,0-4.25,1.29-5.78,3.48h-0.02
+		l0.39-3.33h-1.45l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19
+		C521.13,158.44,519.89,156.76,517.22,156.76L517.22,156.76z M501.92,156.76c-2.08,0-4.25,1.29-5.78,3.48h-0.02l0.39-3.33h-1.45
+		l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19
+		C505.8,158.44,504.57,156.76,501.92,156.76L501.92,156.76z M484.97,158.14c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86
+		c-2.52,0-4.08-1.71-4.08-4.45C479.38,161.12,481.68,158.14,484.97,158.14 M485.03,156.76c-4.4,0-7.12,3.83-7.12,8.19
+		c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C490.53,158.73,488.3,156.76,485.03,156.76 M473.45,156.91l-1.66,13.58h1.45
+		l1.66-13.58H473.45z M474.76,151.61c-0.64,0-1.12,0.48-1.12,1.14c0,0.61,0.44,1.09,1.07,1.09c0.66,0,1.14-0.5,1.14-1.14
+		C475.86,152.09,475.38,151.61,474.76,151.61 M468.3,168.28c-0.85,0.59-1.67,0.92-2.5,0.92c-1.31,0-1.51-1.03-1.34-2.54l1.03-8.46
+		h4.34l0.15-1.29h-4.34l0.61-4.97l-1.49,0.26l-0.55,4.71h-1.62l-0.15,1.29h1.6l-1.07,8.63c-0.28,2.26,0.31,3.81,2.43,3.81
+		c1.07,0,2.19-0.33,3.07-0.96L468.3,168.28z M451.81,169.28c-2.21,0-3.39-1.71-3.39-4.07c0-3.72,2.13-7.08,5.48-7.08
+		c1.09,0,2.91,0.39,3.92,1.66l-0.28,2.21C457.11,165.87,454.7,169.28,451.81,169.28 M458.22,156.91l-0.2,1.44h-0.06
+		c-0.96-1.07-2.52-1.56-4.08-1.56c-4.2,0-6.94,3.96-6.94,8.43c0,3.04,1.62,5.43,4.67,5.43c2.24,0,4.12-1.56,5.32-3.66h0.06
+		l-0.44,3.53H458l1.66-13.58L458.22,156.91z M441.73,160.04h-0.07l0.39-3.13h-1.45l-1.66,13.58h1.45l0.75-6.16
+		c0.53-3.24,2.43-5.58,5.04-5.83l0.22-1.73C444.56,157.09,442.91,158.22,441.73,160.04L441.73,160.04z M426.97,164.11
+		c0.33-3.55,2.72-5.96,5.48-5.96c1.03,0,2.69,0.42,2.69,1.99C435.16,162.67,430.53,163.79,426.97,164.11 M436.63,160.04
+		c0-2.47-2.52-3.28-4.08-3.28c-4.27,0-7.07,3.77-7.07,8.21c0,3.53,2.15,5.63,5.32,5.63c2.19,0,3.72-0.86,5.1-2.43l-1.14-0.85
+		c-1.12,1.27-2.37,1.93-3.9,1.93c-2.13,0-3.74-1.4-3.9-3.85C431.32,165.03,436.63,163.63,436.63,160.04 M437.11,150.93h-1.73
+		l-3.48,3.88h1.6L437.11,150.93z M415.7,169.26c-1.23,0-3.02-0.42-3.83-1.78l0.31-2.67c0.66-3.61,2.94-6.66,5.8-6.66
+		c2.24,0,3.39,1.77,3.39,3.97C421.34,165.98,419.14,169.26,415.7,169.26 M418.22,156.76c-2.36,0-4.23,1.49-5.46,3.55h-0.04
+		l0.42-3.42h-1.45l-2.36,19.14h1.45l0.85-6.97h0.06c0.98,1.07,2.58,1.56,4.14,1.56c4.29,0,6.99-3.96,6.99-8.43
+		C422.83,159.21,421.23,156.76,418.22,156.76L418.22,156.76z M401.6,158.14c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86
+		c-2.52,0-4.08-1.71-4.08-4.45C396.03,161.12,398.33,158.14,401.6,158.14 M401.66,156.76c-4.4,0-7.12,3.83-7.12,8.19
+		c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C407.18,158.73,404.93,156.76,401.66,156.76 M384.77,149.88l-2.48,20.61
+		h1.45l2.52-20.61H384.77z M377.44,156.91l-1.66,13.58h1.45l1.66-13.58H377.44z M378.77,151.61c-0.64,0-1.12,0.48-1.12,1.14
+		c0,0.61,0.44,1.09,1.07,1.09c0.68,0,1.14-0.5,1.14-1.14C379.85,152.09,379.37,151.61,378.77,151.61 M369.22,158.14
+		c1.03,0,2.69,0.42,2.69,1.99c0,2.56-4.62,3.68-8.19,3.97C364.05,160.55,366.44,158.14,369.22,158.14 M367.62,169.26
+		c-2.13,0-3.74-1.4-3.9-3.85c4.34-0.39,9.66-1.78,9.66-5.37c0-2.47-2.52-3.28-4.08-3.28c-4.27,0-7.07,3.77-7.07,8.21
+		c0,3.53,2.15,5.63,5.32,5.63c2.19,0,3.74-0.86,5.1-2.43l-1.14-0.85C370.4,168.59,369.13,169.26,367.62,169.26 M350.87,167.58
+		l-0.96,1.01c1.09,1.31,2.72,2.04,4.62,2.04c2.61,0,4.78-1.31,4.77-3.96c0-2.19-2.1-2.96-3.86-3.79c-1.4-0.59-2.63-1.27-2.63-2.5
+		c0-1.45,1.23-2.3,2.74-2.3c1.18,0,2.19,0.28,3.16,1.38l0.98-1.01c-1.18-1.29-2.59-1.71-4.07-1.71c-2.3,0-4.31,1.4-4.31,3.7
+		c0,1.97,1.53,2.89,3.28,3.61c1.67,0.74,3.22,1.29,3.22,2.78c0,1.55-1.4,2.45-3.28,2.45C353.08,169.29,351.87,168.72,350.87,167.58
+		 M344.18,156.76c-2.08,0-4.25,1.29-5.78,3.48h-0.02l0.39-3.33h-1.45l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27
+		c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19C348.06,158.44,346.83,156.76,344.18,156.76L344.18,156.76z M327.23,158.14
+		c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.54,6.86c-2.52,0-4.08-1.71-4.08-4.45C321.64,161.12,323.94,158.14,327.23,158.14
+		 M327.29,156.76c-4.4,0-7.12,3.83-7.12,8.19c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32
+		C332.79,158.73,330.56,156.76,327.29,156.76 M316.91,167.31l-1.18-0.98c-1.62,1.86-3.86,2.83-5.89,2.83
+		c-3.81,0-6.13-2.67-6.13-6.92c0-5.26,3.39-10.29,8.43-10.29c2.26,0,4.01,1.03,5.48,3.64l1.34-0.9c-1.97-3.16-4.34-4.23-6.81-4.23
+		c-5.94,0-10.05,5.52-10.05,11.79c0,5.3,3.11,8.37,7.64,8.37C312.51,170.64,315.14,169.26,316.91,167.31"/>
+</g>
+</svg><span class="bl"><span class="tbrand"><span class="o">Émo</span>preinte</span> &nbsp;votre empreinte émotionnelle</span></div>
+<div class="wrap" id="app"></div>
+
+<script id="logo-data" type="text/plain"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 595.28 198.43" xml:space="preserve">
+
+<g>
+	<path fill="#E94E1B" d="M336.98,40.79c0,6.86-5.06,11.92-12.22,11.92c-6.86,0-11.92-4.91-11.92-11.63c0-6.86,5.21-11.92,12.36-11.92
+		C332.07,29.16,336.98,34.07,336.98,40.79"/>
+	<path fill="#48235C" d="M51.24,122.71c5.19,0,9.35-2.08,9.35-5.8c0-3.57-4.16-5.04-12.46-9.07c-10.38-5.06-17.79-11.15-17.79-21.69
+		c0-13.97,11.72-23.18,25.8-23.18c9.35,0,19.14,3.42,25.65,11L69.76,85.7c-4.01-5.5-9.64-7.29-13.49-7.29
+		c-4.31,0-7.42,2.23-7.42,5.8c0,3.42,4.6,6.09,11.11,9.37c9.64,4.75,19.14,9.81,19.14,20.96c0.15,15.01-11.11,23.48-28.17,23.48
+		c-10.52,0-21.8-4.6-27.29-12.33l11.43-11.59C39.22,119.45,45.44,122.71,51.24,122.71"/>
+	<path fill="#48235C" d="M140.82,92.57c0-6.55-3.13-12.64-9.51-12.64c-9.51,0-19.91,11.15-23.17,30.47l-0.59,4.6
+		c2.52,4.16,7.43,6.24,13.52,6.24C133.39,121.27,140.82,107.29,140.82,92.57 M160,92.57c0,24.23-14.55,45.48-35.51,45.48
+		c-7.29,0-13.67-1.78-18.42-5.94h-0.29l-3.5,27.75H83.42l11.81-95.55h18.86l-1.64,12.79h0.44c5.8-8.92,13.67-14.13,23.77-14.13
+		C152.12,62.98,160,76.67,160,92.57"/>
+	<path fill="#48235C" d="M187.71,98.05c12.77-1.78,24.95-5.65,24.95-13.52c0-3.13-2.37-5.04-6.53-5.04
+		C198.84,79.49,190.37,85.43,187.71,98.05 M214.42,114.09l14.41,9.37c-8.02,9.51-16.49,14.55-30.58,14.55
+		c-18.42,0-29.84-11.3-29.84-30.6c0-23.48,14.26-44.42,38.9-44.42c12.03,0,23.75,6.83,23.75,20.2c0,17.68-21.09,26-43.35,28.83
+		l-0.29,0.29c1.78,6.38,6.97,9.37,12.03,9.37C205.22,121.68,209.67,119.45,214.42,114.09"/>
+	<path fill="#48235C" d="M236.94,106.81c0-23.33,14.54-43.83,38.88-43.83c11.57,0,21.09,4.45,26.42,12.33l-14.54,11
+		c-2.96-4.6-7.56-6.24-12.62-6.24c-11.28,0-19.15,11.74-19.15,25.7c0,11.44,6.24,15.31,12.33,15.31c4.6,0,9.94-2.23,14.68-7.58
+		l14.7,9.95c-7.73,9.22-17.22,14.55-30.43,14.55C248.66,138.01,236.94,127.47,236.94,106.81"/>
+	<path fill="#48235C" d="M414.43,93.14l-5.94,43.68h-18.73l5.5-41.16c1.34-10.25,0.15-15.6-5.21-15.6c-6.4,0-18.14,11.89-20.52,30.16
+		l-3.57,26.59h-18.73l5.5-41.16c1.34-10.25,0.29-15.6-5.21-15.6c-6.4,0-18.29,11.74-20.66,29.72l-3.28,27.05h-18.75l8.92-72.49
+		h18.73L331,75.9h0.29c6.7-8.61,14.87-12.92,23.79-12.92c8.92,0,14.43,4.01,16.5,12.47h0.44c6.7-8.32,14.87-12.47,24.99-12.47
+		C411.91,62.98,417.09,72.93,414.43,93.14"/>
+	<path fill="#48235C" d="M477.32,87.8v0.44l0.29-1.78c-4.01-4.16-9.51-6.38-14.7-6.38c-11.59,0-18.27,14.85-18.27,27.93
+		c0,8.17,3.57,13.38,10.1,13.38C463.79,121.38,474.65,108.89,477.32,87.8 M498.7,64.32l-8.91,72.49h-18.86l1.64-13.67h-0.15
+		c-5.94,9.37-13.97,14.85-22.58,14.85c-16.49,0-24.36-13.08-24.36-29.57c0-24.07,14.55-45.47,35.05-45.47
+		c7.73,0,14.11,2.37,18.42,6.97h0.29l0.59-5.65h18.86V64.32z"/>
+	<path fill="#48235C" d="M575.79,92.84l-5.8,43.98h-18.86l5.5-41.16c1.49-10.25,0.29-15.6-5.8-15.6c-8.02,0-19.74,11.74-22.13,29.72
+		l-3.26,27.05h-18.86l8.91-72.49h18.86l-1.49,11.74h0.29c6.97-8.61,15.58-13.08,25.24-13.08C573.12,62.98,578.48,72.79,575.79,92.84
+		"/>
+	<path fill="#E94E1B" d="M292.34,47.69c-2.21,0-3.39-1.71-3.39-4.07c0-3.28,2.13-6.66,5.48-6.66c1.09,0,2.91,0.42,3.92,1.67l-0.28,2.19
+		C297.64,44.29,295.23,47.69,292.34,47.69 M298.73,35.73l-0.2,1.45h-0.04c-0.96-1.07-2.56-1.6-4.12-1.6c-4.2,0-6.94,3.96-6.94,8
+		c0,3.04,1.62,5.43,4.67,5.43c2.26,0,4.2-1.62,5.41-3.72h0.04l-0.26,2.1c-0.64,5.15-2.91,6.22-5.89,6.22
+		c-1.23,0-2.63-0.31-4.07-1.14l-0.48,1.38c1.4,0.75,2.85,1.14,4.47,1.14c3.66,0,6.61-1.36,7.36-7.47l1.45-11.79H298.73z
+		 M280.84,35.6c-2.08,0-4.27,1.29-5.78,3.48h-0.04l0.39-3.33h-1.45l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27
+		c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.17C284.73,37.28,283.49,35.6,280.84,35.6L280.84,35.6z M267.67,35.73
+		l-1.66,13.58h1.45l1.66-13.58H267.67z M269,30.45c-0.64,0-1.12,0.48-1.12,1.14c0,0.61,0.44,1.09,1.07,1.09
+		c0.68,0,1.14-0.5,1.14-1.14C270.08,30.91,269.6,30.45,269,30.45 M259.1,35.6c-2.04,0-4.23,1.29-5.78,3.44h-0.04l1.25-10.34h-1.45
+		l-2.52,20.61h1.45l0.74-6.05c0.64-3.53,3.55-6.31,5.96-6.31c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19
+		C263,37.28,261.76,35.6,259.1,35.6 M241.87,49.44c2.41,0,4.08-0.81,5.48-2.43l-1.14-0.85c-1.12,1.34-2.52,1.93-4.25,1.93
+		c-2.08,0-3.75-1.66-3.75-4.34c0-3.68,2.15-6.79,5.63-6.79c1.34,0,2.63,0.53,3.42,1.71l1.18-0.86c-1.01-1.51-2.78-2.21-4.56-2.21
+		c-4.45,0-7.14,3.81-7.14,8.24C236.72,47.51,239.1,49.44,241.87,49.44 M226.27,48.11c-2.21,0-3.39-1.71-3.39-4.07
+		c0-3.72,2.13-7.08,5.48-7.08c1.09,0,2.91,0.39,3.92,1.66l-0.28,2.21C231.55,44.69,229.16,48.11,226.27,48.11 M232.66,35.73
+		l-0.2,1.44h-0.06c-0.96-1.07-2.52-1.56-4.08-1.56c-4.2,0-6.94,3.96-6.94,8.43c0,3.02,1.62,5.43,4.67,5.43
+		c2.24,0,4.12-1.56,5.32-3.66h0.06l-0.44,3.53h1.45l1.66-13.58L232.66,35.73z M213.13,36.96c2.32,0,4.07,1.34,4.07,4.27
+		c0,4.01-2.3,6.86-5.56,6.86c-2.52,0-4.08-1.71-4.08-4.45C207.56,39.96,209.86,36.96,213.13,36.96 M213.19,35.6
+		c-4.4,0-7.12,3.83-7.12,8.19c0,3.61,2.17,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C218.71,37.55,216.46,35.6,213.19,35.6
+		 M202.81,46.13l-1.18-0.98c-1.62,1.84-3.86,2.83-5.89,2.83c-3.81,0-6.13-2.67-6.13-6.92c0-5.26,3.39-10.29,8.43-10.29
+		c2.26,0,4.01,1.03,5.5,3.64l1.34-0.9c-1.97-3.16-4.34-4.23-6.81-4.23c-5.94,0-10.05,5.52-10.05,11.79c0,5.3,3.11,8.37,7.64,8.37
+		C198.41,49.46,201.06,48.1,202.81,46.13 M167.85,35.6c-2.08,0-4.25,1.29-5.78,3.48h-0.04l0.39-3.33h-1.45l-1.66,13.58h1.45
+		l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.49l1.07-8.17
+		C171.75,37.28,170.52,35.6,167.85,35.6L167.85,35.6z M150.91,36.96c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86
+		c-2.52,0-4.08-1.71-4.08-4.45C145.33,39.96,147.63,36.96,150.91,36.96 M150.96,35.6c-4.4,0-7.12,3.83-7.12,8.19
+		c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C156.48,37.55,154.25,35.6,150.96,35.6 M139.41,35.73l-1.66,13.58h1.45
+		l1.66-13.58H139.41z M140.71,30.45c-0.64,0-1.12,0.48-1.12,1.14c0,0.61,0.44,1.09,1.07,1.09c0.66,0,1.14-0.5,1.14-1.14
+		C141.8,30.91,141.34,30.45,140.71,30.45 M134.24,47.1c-0.85,0.59-1.67,0.92-2.48,0.92c-1.31,0-1.51-1.03-1.34-2.56l1.03-8.46h4.34
+		l0.15-1.29h-4.34l0.63-4.97L130.72,31l-0.55,4.71h-1.62L128.4,37h1.6l-1.07,8.63c-0.28,2.26,0.31,3.81,2.43,3.81
+		c1.07,0,2.19-0.33,3.09-0.96L134.24,47.1z M117.77,48.11c-2.21,0-3.39-1.71-3.39-4.07c0-3.72,2.13-7.08,5.48-7.08
+		c1.09,0,2.91,0.39,3.92,1.66l-0.28,2.21C123.07,44.69,120.66,48.11,117.77,48.11 M124.15,35.73l-0.2,1.44h-0.06
+		c-0.96-1.07-2.52-1.56-4.08-1.56c-4.2,0-6.94,3.96-6.94,8.43c0,3.02,1.62,5.43,4.67,5.43c2.24,0,4.12-1.56,5.32-3.66h0.06
+		l-0.44,3.53h1.45l1.66-13.58L124.15,35.73z M106.45,35.6c-1.91,0-3.85,1.2-5.24,3.31h-0.02c-0.2-2.3-1.38-3.31-3.33-3.31
+		c-1.78,0-3.72,1.23-5.15,3.31h-0.06l0.39-3.16h-1.45l-1.66,13.58h1.45l0.74-6.07c0.63-3.5,3.33-6.27,5.41-6.27
+		c1.55,0,2.52,1.01,2.1,4.25l-1.07,8.1h1.45l0.85-6.24c0.66-3.42,3.22-6.11,5.26-6.11c1.55,0,2.56,1.01,2.13,4.25l-1.07,8.1h1.45
+		l1.09-8.17C110.24,37.28,109.01,35.6,106.45,35.6L106.45,35.6z M84.04,38.88h-0.07l0.39-3.13H82.9l-1.66,13.58h1.45l0.75-6.16
+		c0.53-3.26,2.43-5.58,5.04-5.83l0.22-1.73C86.88,35.93,85.22,37.06,84.04,38.88L84.04,38.88z M72.82,36.96
+		c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86c-2.52,0-4.08-1.71-4.08-4.45C67.24,39.96,69.52,36.96,72.82,36.96
+		 M72.87,35.6c-4.4,0-7.12,3.83-7.12,8.19c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C78.39,37.55,76.15,35.6,72.87,35.6
+		 M55.93,30.85h9.66l0.17-1.42H54.53L52.1,49.33h1.56l1.12-9h8.26l0.17-1.45h-8.28L55.93,30.85z"/>
+	<path fill="#E94E1B" d="M539.95,149.88l-2.48,20.61h1.45l2.52-20.61H539.95z M530.82,158.14c1.03,0,2.69,0.42,2.69,1.99
+		c0,2.56-4.62,3.68-8.19,3.97C525.67,160.55,528.04,158.14,530.82,158.14 M529.22,169.26c-2.13,0-3.72-1.4-3.9-3.85
+		c4.34-0.39,9.66-1.78,9.66-5.37c0-2.47-2.52-3.28-4.08-3.28c-4.27,0-7.07,3.77-7.07,8.21c0,3.53,2.15,5.63,5.32,5.63
+		c2.19,0,3.74-0.86,5.1-2.43l-1.14-0.85C532,168.59,530.73,169.26,529.22,169.26 M517.22,156.76c-2.08,0-4.25,1.29-5.78,3.48h-0.02
+		l0.39-3.33h-1.45l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19
+		C521.13,158.44,519.89,156.76,517.22,156.76L517.22,156.76z M501.92,156.76c-2.08,0-4.25,1.29-5.78,3.48h-0.02l0.39-3.33h-1.45
+		l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19
+		C505.8,158.44,504.57,156.76,501.92,156.76L501.92,156.76z M484.97,158.14c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86
+		c-2.52,0-4.08-1.71-4.08-4.45C479.38,161.12,481.68,158.14,484.97,158.14 M485.03,156.76c-4.4,0-7.12,3.83-7.12,8.19
+		c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C490.53,158.73,488.3,156.76,485.03,156.76 M473.45,156.91l-1.66,13.58h1.45
+		l1.66-13.58H473.45z M474.76,151.61c-0.64,0-1.12,0.48-1.12,1.14c0,0.61,0.44,1.09,1.07,1.09c0.66,0,1.14-0.5,1.14-1.14
+		C475.86,152.09,475.38,151.61,474.76,151.61 M468.3,168.28c-0.85,0.59-1.67,0.92-2.5,0.92c-1.31,0-1.51-1.03-1.34-2.54l1.03-8.46
+		h4.34l0.15-1.29h-4.34l0.61-4.97l-1.49,0.26l-0.55,4.71h-1.62l-0.15,1.29h1.6l-1.07,8.63c-0.28,2.26,0.31,3.81,2.43,3.81
+		c1.07,0,2.19-0.33,3.07-0.96L468.3,168.28z M451.81,169.28c-2.21,0-3.39-1.71-3.39-4.07c0-3.72,2.13-7.08,5.48-7.08
+		c1.09,0,2.91,0.39,3.92,1.66l-0.28,2.21C457.11,165.87,454.7,169.28,451.81,169.28 M458.22,156.91l-0.2,1.44h-0.06
+		c-0.96-1.07-2.52-1.56-4.08-1.56c-4.2,0-6.94,3.96-6.94,8.43c0,3.04,1.62,5.43,4.67,5.43c2.24,0,4.12-1.56,5.32-3.66h0.06
+		l-0.44,3.53H458l1.66-13.58L458.22,156.91z M441.73,160.04h-0.07l0.39-3.13h-1.45l-1.66,13.58h1.45l0.75-6.16
+		c0.53-3.24,2.43-5.58,5.04-5.83l0.22-1.73C444.56,157.09,442.91,158.22,441.73,160.04L441.73,160.04z M426.97,164.11
+		c0.33-3.55,2.72-5.96,5.48-5.96c1.03,0,2.69,0.42,2.69,1.99C435.16,162.67,430.53,163.79,426.97,164.11 M436.63,160.04
+		c0-2.47-2.52-3.28-4.08-3.28c-4.27,0-7.07,3.77-7.07,8.21c0,3.53,2.15,5.63,5.32,5.63c2.19,0,3.72-0.86,5.1-2.43l-1.14-0.85
+		c-1.12,1.27-2.37,1.93-3.9,1.93c-2.13,0-3.74-1.4-3.9-3.85C431.32,165.03,436.63,163.63,436.63,160.04 M437.11,150.93h-1.73
+		l-3.48,3.88h1.6L437.11,150.93z M415.7,169.26c-1.23,0-3.02-0.42-3.83-1.78l0.31-2.67c0.66-3.61,2.94-6.66,5.8-6.66
+		c2.24,0,3.39,1.77,3.39,3.97C421.34,165.98,419.14,169.26,415.7,169.26 M418.22,156.76c-2.36,0-4.23,1.49-5.46,3.55h-0.04
+		l0.42-3.42h-1.45l-2.36,19.14h1.45l0.85-6.97h0.06c0.98,1.07,2.58,1.56,4.14,1.56c4.29,0,6.99-3.96,6.99-8.43
+		C422.83,159.21,421.23,156.76,418.22,156.76L418.22,156.76z M401.6,158.14c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.56,6.86
+		c-2.52,0-4.08-1.71-4.08-4.45C396.03,161.12,398.33,158.14,401.6,158.14 M401.66,156.76c-4.4,0-7.12,3.83-7.12,8.19
+		c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32C407.18,158.73,404.93,156.76,401.66,156.76 M384.77,149.88l-2.48,20.61
+		h1.45l2.52-20.61H384.77z M377.44,156.91l-1.66,13.58h1.45l1.66-13.58H377.44z M378.77,151.61c-0.64,0-1.12,0.48-1.12,1.14
+		c0,0.61,0.44,1.09,1.07,1.09c0.68,0,1.14-0.5,1.14-1.14C379.85,152.09,379.37,151.61,378.77,151.61 M369.22,158.14
+		c1.03,0,2.69,0.42,2.69,1.99c0,2.56-4.62,3.68-8.19,3.97C364.05,160.55,366.44,158.14,369.22,158.14 M367.62,169.26
+		c-2.13,0-3.74-1.4-3.9-3.85c4.34-0.39,9.66-1.78,9.66-5.37c0-2.47-2.52-3.28-4.08-3.28c-4.27,0-7.07,3.77-7.07,8.21
+		c0,3.53,2.15,5.63,5.32,5.63c2.19,0,3.74-0.86,5.1-2.43l-1.14-0.85C370.4,168.59,369.13,169.26,367.62,169.26 M350.87,167.58
+		l-0.96,1.01c1.09,1.31,2.72,2.04,4.62,2.04c2.61,0,4.78-1.31,4.77-3.96c0-2.19-2.1-2.96-3.86-3.79c-1.4-0.59-2.63-1.27-2.63-2.5
+		c0-1.45,1.23-2.3,2.74-2.3c1.18,0,2.19,0.28,3.16,1.38l0.98-1.01c-1.18-1.29-2.59-1.71-4.07-1.71c-2.3,0-4.31,1.4-4.31,3.7
+		c0,1.97,1.53,2.89,3.28,3.61c1.67,0.74,3.22,1.29,3.22,2.78c0,1.55-1.4,2.45-3.28,2.45C353.08,169.29,351.87,168.72,350.87,167.58
+		 M344.18,156.76c-2.08,0-4.25,1.29-5.78,3.48h-0.02l0.39-3.33h-1.45l-1.66,13.58h1.45l0.74-6.07c0.64-3.5,3.55-6.27,5.96-6.27
+		c1.67,0,2.69,1.01,2.26,4.25l-1.07,8.1h1.45l1.07-8.19C348.06,158.44,346.83,156.76,344.18,156.76L344.18,156.76z M327.23,158.14
+		c2.32,0,4.07,1.34,4.07,4.27c0,4.01-2.3,6.86-5.54,6.86c-2.52,0-4.08-1.71-4.08-4.45C321.64,161.12,323.94,158.14,327.23,158.14
+		 M327.29,156.76c-4.4,0-7.12,3.83-7.12,8.19c0,3.61,2.19,5.69,5.54,5.69c4.43,0,7.08-3.7,7.08-8.32
+		C332.79,158.73,330.56,156.76,327.29,156.76 M316.91,167.31l-1.18-0.98c-1.62,1.86-3.86,2.83-5.89,2.83
+		c-3.81,0-6.13-2.67-6.13-6.92c0-5.26,3.39-10.29,8.43-10.29c2.26,0,4.01,1.03,5.48,3.64l1.34-0.9c-1.97-3.16-4.34-4.23-6.81-4.23
+		c-5.94,0-10.05,5.52-10.05,11.79c0,5.3,3.11,8.37,7.64,8.37C312.51,170.64,315.14,169.26,316.91,167.31"/>
+</g>
+</svg></script>
+<script>
+const DATA = {"scales": [{"id": "PS", "name": "Perception de soi", "color": "#48235C", "desc": "La façon dont vous vous connaissez, vous estimez et accueillez vos émotions."}, {"id": "EI", "name": "Expression individuelle", "color": "#e94e1b", "desc": "Votre capacité à exprimer vos émotions, à vous affirmer et à agir avec autonomie."}, {"id": "RH", "name": "Relations humaines", "color": "#8e5fa8", "desc": "La qualité de vos liens, votre écoute et votre engagement envers le collectif."}, {"id": "PD", "name": "Prise de décision", "color": "#c4622e", "desc": "Votre manière de résoudre les problèmes, de rester objectif et de maîtriser vos impulsions."}, {"id": "GS", "name": "Gestion du stress", "color": "#6f6b78", "desc": "Votre aptitude à vous adapter, à absorber la pression et à garder un regard positif."}], "facets": [{"id": 0, "s": "PS", "name": "Amour-propre", "items": ["Je reconnais mes qualités et je m'estime à ma juste valeur.", "Je m'accorde de la bienveillance, même après une erreur.", "Je doute souvent de ma valeur."], "generic": "L'estime que vous vous portez et la bienveillance que vous vous accordez.", "strength": "Vous vous estimez à votre juste valeur et vous vous accordez de la bienveillance, ce qui vous donne une base solide pour agir.", "dev": "Renforcer la reconnaissance de vos propres qualités consoliderait votre assise personnelle.", "actions": ["Notez chaque semaine trois réussites, même modestes, pour ancrer vos acquis.", "Au calme, remémorez-vous une réussite récente et ce qu'elle dit de vos qualités.", "Demandez à un proche de confiance ce qu'il apprécie chez vous, et accueillez sa réponse."], "actions_soin": ["Après une situation difficile, parlez-vous comme à un collègue que vous soutiendriez.", "En fin de poste, notez un geste de soin que vous avez bien mené et ce qu'il dit de vous.", "Demandez à un collègue de confiance un retour sur un point fort qu'il observe chez vous."]}, {"id": 1, "s": "PS", "name": "Réalisation de soi", "items": ["Je cherche à progresser et à donner du sens à ce que je fais.", "Je me fixe des objectifs qui me tiennent à cœur.", "Je ressens du plaisir à apprendre et à me dépasser."], "generic": "Votre élan à progresser et à donner du sens à ce que vous faites.", "strength": "Vous cherchez à grandir et à donner du sens à votre action, ce qui nourrit une motivation durable.", "dev": "Clarifier ce qui compte vraiment pour vous redonnerait de l'élan à votre quotidien.", "actions": ["Écrivez un objectif qui vous tient à cœur pour les trois mois à venir, et sa première étape.", "Choisissez une compétence qui vous motive et inscrivez-vous à une formation courte.", "Échangez avec votre manager sur une mission qui aurait du sens pour vous."], "actions_soin": ["Reliez une tâche routinière au sens qu'elle a pour les patients, et redites-le-vous.", "Choisissez un domaine du soin à approfondir et repérez une formation ou un compagnonnage.", "Échangez avec votre cadre sur une mission ou un projet qui aurait du sens pour vous."]}, {"id": 2, "s": "PS", "name": "Conscience de soi émotionnelle", "items": ["Je repère facilement l'émotion qui me traverse sur le moment.", "Je comprends ce qui déclenche mes réactions.", "Je sais nommer ce que je ressens avec précision."], "generic": "Votre capacité à repérer et comprendre vos propres émotions.", "strength": "Vous identifiez vite ce que vous ressentez et ce qui le déclenche, un atout pour vous ajuster avec justesse.", "dev": "Affiner la lecture de vos émotions vous aiderait à mieux anticiper vos réactions.", "actions": ["En fin de journée, prenez deux minutes d'écoute de soi pour nommer l'émotion dominante et son déclencheur.", "Tenez une liste des situations qui réveillent le plus vos émotions.", "Repérez la sensation physique qui accompagne vos émotions, par exemple la gorge serrée ou le ventre noué."], "actions_soin": ["Après une prise en charge éprouvante, prenez deux minutes d'écoute de soi pour nommer ce que vous ressentez.", "Tenez une liste des situations de service qui réveillent le plus vos émotions.", "Repérez la sensation physique qui monte en service, par exemple la gorge serrée, comme signal d'alerte."]}, {"id": 3, "s": "EI", "name": "Expression émotionnelle", "items": ["J'exprime mes émotions de façon claire et appropriée.", "Je partage mes ressentis avec les personnes concernées.", "Je trouve les mots pour dire ce qui m'anime."], "generic": "La clarté avec laquelle vous exprimez ce que vous ressentez.", "strength": "Vous exprimez vos émotions de façon claire et appropriée, ce qui fluidifie vos échanges.", "dev": "Oser partager davantage vos ressentis renforcerait la qualité de vos relations.", "actions": ["Choisissez une situation cette semaine pour dire calmement une émotion utile à la personne concernée.", "Entraînez-vous à formuler un ressenti avec « je » auprès d'un binôme de confiance.", "Écrivez ce que vous ressentez avant un échange délicat, pour clarifier ce que vous voulez dire."], "actions_soin": ["Lors d'un temps d'équipe ou d'un débriefing, partagez calmement un ressenti lié à une situation de soin.", "Préparez une phrase simple pour dire à un collègue ce qu'une prise en charge a réveillé en vous.", "Écrivez ce que vous ressentez après un poste marquant, pour mettre des mots avant d'en parler."]}, {"id": 4, "s": "EI", "name": "Affirmation de soi", "items": ["Je défends mon point de vue avec calme et fermeté.", "Je dis ce que je pense tout en respectant l'autre.", "Je garde mes désaccords pour moi."], "generic": "Votre aptitude à défendre vos idées et à poser vos limites avec respect.", "strength": "Vous défendez votre point de vue avec calme et fermeté tout en respectant l'autre.", "dev": "Affirmer vos positions plus tôt dans l'échange gagnerait à devenir un réflexe.", "actions": ["Préparez et répétez à voix haute une phrase d'ancrage : « voici ma position, et voici pourquoi ».", "Identifiez une limite à poser cette semaine et formulez-la simplement à la personne concernée.", "Observez une personne qui s'affirme avec calme et repérez une formule à reprendre."], "actions_soin": ["En réunion de service, énoncez clairement votre observation sur un patient et ce que vous préconisez.", "Posez une limite de charge avant la saturation et formulez-la simplement à votre cadre.", "Repérez chez un collègue qui s'affirme avec calme une formule à reprendre."]}, {"id": 5, "s": "EI", "name": "Indépendance", "items": ["Je prends mes décisions en m'appuyant sur mon propre jugement.", "J'avance dans mes tâches en gardant mon autonomie.", "J'assume mes choix sans chercher constamment l'approbation."], "generic": "Votre capacité à décider et à agir en vous appuyant sur votre propre jugement.", "strength": "Vous décidez et avancez de façon autonome, en assumant vos choix.", "dev": "Vous appuyer davantage sur votre propre jugement renforcerait votre autonomie.", "actions": ["Avant de demander un avis, posez d'abord votre propre analyse par écrit.", "Prenez une décision courante de la semaine en vous fiant à votre seul jugement, puis observez le résultat.", "Dans un moment au calme, mettez à plat un choix à venir en vous appuyant sur vos propres critères."], "actions_soin": ["Appuyez-vous sur votre évaluation clinique pour proposer une conduite, puis confrontez-la à l'équipe.", "Pour une décision de votre périmètre, fiez-vous d'abord à votre jugement professionnel.", "Après une décision prise en autonomie, prenez un temps de recul sur ce qui a bien fonctionné."]}, {"id": 6, "s": "RH", "name": "Relations humaines", "items": ["J'entretiens des relations de confiance avec mon entourage.", "Je crée facilement un lien sincère avec les autres.", "J'ai du mal à tisser des liens de confiance."], "generic": "La qualité et la solidité des liens que vous tissez.", "strength": "Vous nouez des relations de confiance et restez disponible pour les autres.", "dev": "Investir un peu plus de temps relationnel consoliderait votre réseau d'appui.", "actions": ["Proposez un café ou un déjeuner à un collègue cette semaine.", "Reprenez contact avec une personne que vous appréciez et avez peu vue.", "Accordez chaque jour quelques minutes à un échange sincère, sans but utilitaire."], "actions_soin": ["Prenez cinq minutes par poste pour un échange sincère avec un collègue du service.", "Soignez le lien avec les autres métiers du parcours patient : brancardage, secrétariat, pharmacie.", "Adressez un mot de reconnaissance à un collègue qui vous a soutenu."]}, {"id": 7, "s": "RH", "name": "Empathie", "items": ["Je perçois ce que ressent la personne en face de moi.", "Je tiens compte du point de vue des autres.", "Je m'ajuste à l'état émotionnel de mon interlocuteur."], "generic": "Votre sensibilité à ce que vivent et ressentent les autres.", "strength": "Vous percevez finement l'état des autres et vous y ajustez.", "dev": "Vérifier votre lecture de l'autre par une question ouverte affinerait votre empathie.", "actions": ["Avant de répondre, reformulez ce que l'autre semble ressentir pour le valider.", "Posez une question ouverte du type « comment vis-tu cette situation ? » et écoutez sans interrompre.", "Discutez avec une personne au vécu différent du vôtre et cherchez à comprendre son ressenti."], "actions_soin": ["Avant de répondre à un patient inquiet, reformulez ce qu'il semble ressentir pour le valider.", "Auprès d'un proche éprouvé, posez une question ouverte sur ce qu'il traverse et écoutez.", "En équipe, cherchez le besoin d'un collègue tendu derrière sa réaction."]}, {"id": 8, "s": "RH", "name": "Responsabilité sociale", "items": ["Je contribue volontiers à l'effort collectif.", "Je me soucie du bien commun dans mon équipe.", "Je tiens mes engagements vis-à-vis du groupe."], "generic": "Votre engagement envers le collectif et le bien commun.", "strength": "Vous contribuez volontiers à l'effort collectif et tenez vos engagements.", "dev": "Rendre votre contribution au collectif plus visible valoriserait votre engagement.", "actions": ["Proposez une initiative utile à votre équipe ce mois-ci et suivez-la jusqu'au bout.", "Offrez un coup de main concret à un collègue débordé cette semaine.", "Engagez-vous dans une cause ou une activité collective qui a du sens pour vous."], "actions_soin": ["Proposez une amélioration concrète pour le confort des patients ou la fluidité du service.", "Offrez un appui à un collègue débordé pendant un poste chargé.", "Participez à un projet d'équipe qui a du sens et suivez votre engagement jusqu'au bout."]}, {"id": 9, "s": "PD", "name": "Résolution de problèmes", "items": ["Face à une difficulté, je cherche des solutions concrètes.", "Je garde mes émotions à bonne distance pour décider.", "Je décompose un problème complexe en étapes claires."], "generic": "Votre manière d'aborder les difficultés et de trouver des solutions.", "strength": "Vous cherchez des solutions concrètes et décomposez les problèmes avec méthode.", "dev": "Structurer davantage votre démarche faciliterait la résolution des cas complexes.", "actions": ["Face à un problème, écrivez les faits, les options, puis votre choix.", "Découpez une difficulté en trois étapes et traitez-en une dès aujourd'hui.", "Demandez à un binôme de challenger votre solution avant de décider."], "actions_soin": ["Face à une situation clinique complexe, écrivez les faits, les options, puis la conduite retenue.", "Décomposez un problème d'organisation du service en étapes traitables une à une.", "Débriefez avec un binôme ce qui a fonctionné après une situation tendue, pour le réutiliser."]}, {"id": 10, "s": "PD", "name": "Sens des réalités", "items": ["J'évalue les situations avec lucidité, faits à l'appui.", "Je distingue mes impressions des faits objectifs.", "Je garde une vision réaliste de ce qui est possible."], "generic": "Votre lucidité à évaluer les situations à partir des faits.", "strength": "Vous évaluez les situations avec lucidité et distinguez les faits de vos impressions.", "dev": "Confronter vos impressions aux faits renforcerait votre objectivité.", "actions": ["Avant de conclure, demandez-vous « quels faits soutiennent cette idée ? » et cherchez-en un contraire.", "Confrontez votre lecture d'une situation à l'avis d'une personne extérieure.", "Sur un sujet sensible, écrivez d'un côté les faits, de l'autre vos interprétations."], "actions_soin": ["Sur une situation patient sensible, distinguez par écrit les faits cliniques de vos interprétations.", "Avant de conclure, demandez-vous quels éléments objectifs soutiennent votre lecture.", "Croisez votre observation avec celle d'un collègue pour valider une évaluation importante."]}, {"id": 11, "s": "PD", "name": "Contrôle des impulsions", "items": ["Je prends le temps de réfléchir avant d'agir.", "Je garde mon sang-froid dans l'urgence.", "Je réagis souvent à chaud."], "generic": "Votre capacité à réfléchir avant d'agir et à garder votre sang-froid.", "strength": "Vous prenez le temps de réfléchir et gardez votre sang-froid dans l'urgence.", "dev": "Marquer une pause avant de réagir à chaud renforcerait votre maîtrise.", "actions": ["Avant de réagir, marquez une pause : respirez lentement deux ou trois fois, puis répondez.", "Différez d'une heure l'envoi d'un message écrit sous le coup de l'émotion, puis relisez-le.", "Pratiquez régulièrement une activité physique qui vous plaît, marche, sport, danse ou jardinage, pour évacuer la tension et gagner en recul."], "actions_soin": ["Face à une urgence, marquez une pause : respirez lentement deux ou trois fois, puis agissez.", "Une application de cohérence cardiaque, sur une pause, peut vous aider à retrouver votre calme.", "Après une émotion forte, différez une réponse à chaud à un patient ou à un collègue."]}, {"id": 12, "s": "GS", "name": "Flexibilité", "items": ["Je m'adapte avec aisance aux imprévus.", "J'accueille le changement comme une occasion d'ajustement.", "Je révise ma façon de faire quand la situation l'exige."], "generic": "Votre aisance à vous adapter aux imprévus et au changement.", "strength": "Vous vous adaptez avec aisance et révisez votre façon de faire au besoin.", "dev": "Accueillir le changement comme une occasion d'ajustement développerait votre souplesse.", "actions": ["Face à un imprévu, formulez une option B avant de réagir.", "Testez une nouvelle façon de faire sur une tâche habituelle cette semaine.", "Demandez à un collègue sa méthode et essayez-la une fois pour comparer."], "actions_soin": ["Face à un imprévu de service, formulez une option de repli avant de réagir.", "Testez une organisation différente sur une tâche récurrente du poste.", "Demandez à un collègue sa façon de gérer une situation et essayez-la une fois."]}, {"id": 13, "s": "GS", "name": "Tolérance au stress", "items": ["Je reste efficace même sous pression.", "Je traverse les périodes tendues en gardant mon équilibre.", "La pression me gagne vite."], "generic": "Votre aptitude à rester efficace et équilibré sous pression.", "strength": "Vous restez efficace sous pression et récupérez vite après une tension.", "dev": "Installer des temps de récupération soutiendrait votre équilibre dans la durée.", "actions": ["Repérez vos premiers signaux de tension et associez-leur une micro-pause de deux minutes.", "Marchez quelques minutes dehors, au contact de la nature, pour relâcher la pression.", "Une application de cohérence cardiaque peut vous aider à réguler avant un moment exigeant."], "actions_soin": ["Repérez vos premiers signaux de tension en poste et associez-leur une micro-pause.", "Sur une pause, marchez quelques minutes dehors, au contact de l'air et de la nature, pour relâcher.", "Pratiquez régulièrement, hors travail, une activité physique qui vous plaît, marche, sport, danse ou jardinage, pour évacuer la tension et récupérer."]}, {"id": 14, "s": "GS", "name": "Optimisme", "items": ["Je garde confiance en l'avenir, même dans l'adversité.", "Je vois le côté constructif des situations.", "J'aborde les défis avec une énergie positive."], "generic": "Votre regard confiant et constructif sur l'avenir.", "strength": "Vous gardez confiance et voyez le côté constructif des situations.", "dev": "Cultiver des points d'appui positifs renforcerait votre élan dans l'adversité.", "actions": ["En fin de journée, notez un fait positif et ce qu'il rend possible pour la suite.", "Accordez-vous un temps de contemplation, un paysage, le ciel, pour reprendre du recul.", "Face à un revers, formulez avec un proche l'enseignement à en tirer."], "actions_soin": ["En fin de poste, repérez une prise en charge qui s'est bien passée et ce qu'elle rend possible.", "Accordez-vous un temps de contemplation au calme, dehors si possible, pour reprendre du recul.", "Face à un revers, formulez avec un collègue l'enseignement à en tirer pour la prochaine fois."]}], "anchors": ["Rarement", "De temps en temps", "Souvent", "Très souvent", "Presque toujours"], "bands": [{"max": 39, "label": "À consolider"}, {"max": 59, "label": "En développement"}, {"max": 79, "label": "Appui solide"}, {"max": 100, "label": "Point d'appui majeur"}], "reverse": [2, 14, 20, 35, 41]};
+const SCALES = DATA.scales, FACETS = DATA.facets, ANCHORS = DATA.anchors, BANDS = DATA.bands;
+const REV = new Set(DATA.reverse||[]);
+const BAND_COLORS = {"À consolider":"#b06a1f","En développement":"#c4622e","Appui solide":"#8e5fa8","Point d'appui majeur":"#48235C"};
+const BAND_SENT = {"À consolider":"À ce stade, cette dimension gagnerait à devenir un point d'attention prioritaire.","En développement":"Cette dimension est en cours d'installation : quelques appuis ciblés la renforceront.","Appui solide":"Cette dimension constitue un appui solide sur lequel capitaliser.","Point d'appui majeur":"Cette dimension est un point fort marqué, moteur pour le reste."};
+const LOGO = document.getElementById('logo-data').textContent;
+const app = document.getElementById('app');
+let answers = new Array(45).fill(null);
+let userName = '';
+let userCtx = null;
+/* ===== CONFIG : adresse e-mail de la formatrice. Renseignez-la pour activer le bouton d'envoi. ===== */
+const FORMATRICE_EMAIL = "catherine.besse@speciman.fr";
+/* ===== Message de clôture affiché au participant. Modifiable. ===== */
+const CLOTURE_MSG = "Bonjour, vous venez de compléter votre autodiagnostic Émopreinte. À l'issue de la formation « Gérer les situations à forte charge émotionnelle », je vous adresserai votre rapport personnalisé, qui s'appuie sur les cinq dimensions de l'intelligence émotionnelle. À bientôt. Catherine Besse.";
+function getParam(n){const hay=(location.search||'')+'&'+((location.hash||'').replace(/^#/,'&'));const m=hay.match(new RegExp('[?&]'+n+'=([^&]+)'));return m?decodeURIComponent(m[1].replace(/\+/g,' ')):'';}
+let userGroupe = getParam('groupe')||getParam('g');
+
+function esc(s){return (s+'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function bandFor(score){for(const b of BANDS){if(score<=b.max)return b.label;}return BANDS[BANDS.length-1].label;}
+function facetScore(a,i){const b=i*3;const iv=k=>{const idx=b+k;return REV.has(idx)?(6-a[idx]):a[idx];};const m=(iv(0)+iv(1)+iv(2))/3;return ((m-1)/4)*100;}
+function scaleScore(a,sid){const fs=FACETS.filter(f=>f.s===sid);const v=fs.reduce((x,f)=>x+facetScore(a,f.id),0)/fs.length;return v;}
+function globalScore(a){const v=SCALES.reduce((x,s)=>x+scaleScore(a,s.id),0)/SCALES.length;return v;}
+
+/* ---------- encode / decode (carries context: 0 soin, 1 hors) ---------- */
+function encode(a, ctx){
+  let v=1n;
+  v=v*2n+BigInt(ctx);
+  for(const x of a){v=v*5n+BigInt(x-1);}
+  let s=v.toString(36).toUpperCase();
+  let sum=(a.reduce((x,y)=>x+y,0)+ctx)%1296;
+  let cs=sum.toString(36).toUpperCase().padStart(2,'0');
+  let full=s+cs;
+  return full.match(/.{1,4}/g).join('-');
+}
+function decode(code){
+  let c=(code||'').toUpperCase().replace(/[^0-9A-Z]/g,'');
+  if(c.length<3)return null;
+  let cs=c.slice(-2), payload=c.slice(0,-2);
+  let v=0n;
+  for(const ch of payload){let d=parseInt(ch,36);if(isNaN(d))return null;v=v*36n+BigInt(d);}
+  let digits=[];
+  for(let i=0;i<45;i++){digits.push(Number(v%5n));v=v/5n;}
+  let ctx=Number(v%2n);v=v/2n;
+  if(v!==1n)return null;
+  if(ctx!==0&&ctx!==1)return null;
+  digits.reverse();
+  let a=digits.map(d=>d+1);
+  if(a.some(x=>x<1||x>5))return null;
+  let sum=(a.reduce((x,y)=>x+y,0)+ctx)%1296;
+  if(sum.toString(36).toUpperCase().padStart(2,'0')!==cs)return null;
+  return {a:a, ctx:ctx};
+}
+
+/* ---------- navigation ---------- */
+function go(screen){window.scrollTo(0,0);screen();}
+
+function home(){
+  app.innerHTML='';
+  const h=document.createElement('div');
+  h.innerHTML=`
+    <h1 class="brandtitle"><span class="o">Émo</span>preinte</h1>
+    <p class="lead">Votre empreinte émotionnelle. L'autodiagnostic d'intelligence émotionnelle Speciman, sur cinq dimensions et quinze composantes.</p>
+    <div class="choice-cards">
+      <button class="choice" id="c-quiz">
+        <div class="ic">📝</div><b>Je passe l'autodiagnostic</b>
+        <span>Environ 8 à 10 minutes. À la fin, vous obtenez un code à transmettre à votre formatrice.</span>
+      </button>
+      <button class="choice" id="c-rest">
+        <div class="ic">📊</div><b>J'ai un code à restituer</b>
+        <span>Espace formatrice : collez le code reçu pour générer le profil et le rapport.</span>
+      </button>
+    </div>`;
+  app.appendChild(h);
+  document.getElementById('c-quiz').onclick=()=>{answers=new Array(45).fill(null);go(quiz);};
+  document.getElementById('c-rest').onclick=()=>go(restitution);
+}
+
+/* ---------- quiz ---------- */
+function quiz(){
+  app.innerHTML='';
+  const prog=document.createElement('div');prog.className='progress';
+  prog.innerHTML=`<div class="pbar"><i id="pb"></i></div><div class="pcount" id="pc">0 / 45 réponses</div>`;
+  app.appendChild(prog);
+  const intro=document.createElement('p');intro.className='lead';
+  intro.textContent="Cet autodiagnostic explore votre intelligence émotionnelle, sur cinq dimensions et quinze composantes. Répondez spontanément : chaque réponse est juste dès lors qu'elle vous ressemble. Indiquez à quelle fréquence l'affirmation vous correspond.";
+  app.appendChild(intro);
+
+  const ctxCard=document.createElement('div');ctxCard.className='card';
+  ctxCard.innerHTML=`<div class="field" style="margin:0"><label>Votre contexte</label>
+    <div class="seg">
+      <button type="button" class="seg-btn" data-c="0">Soignant·e</button>
+      <button type="button" class="seg-btn" data-c="1">Non soignant·e ou fonction support</button>
+    </div></div>`;
+  app.appendChild(ctxCard);
+  ctxCard.querySelectorAll('.seg-btn').forEach(b=>{
+    if(userCtx!==null&&Number(b.dataset.c)===userCtx)b.classList.add('sel');
+    b.onclick=()=>{userCtx=Number(b.dataset.c);
+      ctxCard.querySelectorAll('.seg-btn').forEach(e=>e.classList.remove('sel'));
+      b.classList.add('sel');updateProgress();};
+  });
+
+  const nameCard=document.createElement('div');nameCard.className='card';
+  nameCard.innerHTML=`<div class="field" style="margin:0"><label>Vos nom et prénom</label>
+    <input class="txt" id="qname" placeholder="Nom et prénom" value="${esc(userName)}"></div>`;
+  app.appendChild(nameCard);
+
+  const rgpd=document.createElement('p');rgpd.className='hint';
+  rgpd.textContent="Vos réponses restent sur votre appareil. Le code que vous transmettez sert uniquement à produire votre profil, qui vous est partagé lors de la restitution.";
+  app.appendChild(rgpd);
+  if(userGroupe){const gr=document.createElement('p');gr.className='hint';gr.style.fontWeight='700';gr.style.color='var(--violet)';gr.textContent='Groupe : '+userGroupe;app.appendChild(gr);}
+
+  SCALES.forEach(sc=>{
+    const sh=document.createElement('div');sh.className='scale-head';
+    sh.innerHTML=`<span class="scale-dot" style="background:${sc.color}"></span><b style="color:${sc.color}">${esc(sc.name)}</b>`;
+    app.appendChild(sh);
+    const card=document.createElement('div');card.className='card';
+    FACETS.filter(f=>f.s===sc.id).forEach(f=>{
+      f.items.forEach((txt,k)=>{
+        const idx=f.id*3+k;
+        const qi=document.createElement('div');qi.className='qitem';
+        const qt=document.createElement('div');qt.className='qtext';qt.textContent=txt;qi.appendChild(qt);
+        const row=document.createElement('div');row.className='scale-row';
+        ANCHORS.forEach((an,ai)=>{
+          const o=document.createElement('div');o.className='opt';o.dataset.idx=idx;o.dataset.val=ai+1;
+          o.innerHTML=`<b>${ai+1}</b>${esc(an)}`;
+          o.onclick=()=>{answers[idx]=ai+1;
+            row.querySelectorAll('.opt').forEach(e=>e.classList.remove('sel'));
+            o.classList.add('sel');updateProgress();};
+          row.appendChild(o);
+        });
+        qi.appendChild(row);card.appendChild(qi);
+      });
+    });
+    app.appendChild(card);
+  });
+
+  const foot=document.createElement('div');foot.className='btn-row no-print';
+  foot.innerHTML=`<button class="btn btn-ghost" id="q-back">Retour</button>
+    <button class="btn btn-primary" id="q-go" disabled style="opacity:.5">Valider mes réponses</button>`;
+  app.appendChild(foot);
+  const warn=document.createElement('div');warn.className='hint';warn.id='q-warn';app.appendChild(warn);
+  document.getElementById('q-back').onclick=()=>go(home);
+  document.getElementById('q-go').onclick=()=>{
+    if(userCtx===null){document.getElementById('q-warn').innerHTML='<span class="err">Merci d\'indiquer votre contexte.</span>';return;}
+    const nm=(document.getElementById('qname').value||'').trim();
+    if(!nm){document.getElementById('q-warn').innerHTML='<span class="err">Merci d\'indiquer vos nom et prénom.</span>';return;}
+    const miss=answers.findIndex(x=>x===null);
+    if(miss>=0){document.getElementById('q-warn').innerHTML='<span class="err">Merci de répondre à toutes les affirmations avant de valider.</span>';return;}
+    userName=nm;
+    go(()=>resultCode(encode(answers, userCtx), userName));
+  };
+  document.getElementById('qname').oninput=updateProgress;
+  updateProgress();
+}
+function updateProgress(){
+  const n=answers.filter(x=>x!==null).length;
+  const pb=document.getElementById('pb'),pc=document.getElementById('pc'),go=document.getElementById('q-go');
+  const nameOk=((document.getElementById('qname')||{}).value||'').trim().length>0;
+  if(pb)pb.style.width=(n/45*100)+'%';
+  if(pc)pc.textContent=n+' / 45 réponses';
+  if(go){const ok=n===45&&nameOk&&userCtx!==null;go.disabled=!ok;go.style.opacity=ok?1:.5;}
+}
+
+/* ---------- stagiaire result ---------- */
+function resultCode(code, name){
+  app.innerHTML='';
+  const block=(userGroupe?('[GROUPE] '+userGroupe+'\n'):'')+'[NOM] '+(name||'')+'\n[CODE] '+code;
+  const hasEmail=FORMATRICE_EMAIL && FORMATRICE_EMAIL.indexOf('@')>0;
+  const subject='Émopreinte - résultat de '+(name||'')+(userGroupe?(' ['+userGroupe+']'):'');
+  const mailto='mailto:'+encodeURIComponent(FORMATRICE_EMAIL)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(block);
+  const emailBtn=hasEmail?`<a class="btn btn-primary" href="${mailto}" id="mail">Envoyer à ma formatrice</a>`:'';
+  const copyClass=hasEmail?'btn-ghost':'btn-primary';
+  const recipient=hasEmail?`<p class="hint" style="margin-top:10px">Destinataire : ${esc(FORMATRICE_EMAIL)}. Le message s'ouvre prérempli, vous n'avez plus qu'à l'envoyer.</p>`:'';
+  const d=document.createElement('div');
+  d.innerHTML=`
+    <h1>Merci, c'est terminé</h1>
+    <p class="lead">Voici votre résultat. Transmettez l'ensemble ci-dessous à votre formatrice : elle générera votre profil et votre rapport personnalisé, qu'elle vous remettra.</p>
+    <div class="card">
+      <div class="field" style="margin-top:0"><label>Nom et prénom</label>
+        <div style="font-weight:700;color:var(--violet)">${esc(name||'')}</div></div>
+      <div class="field"><label>Code résultat</label>
+        <div class="codebox" id="code">${esc(code)}</div></div>
+      <div class="btn-row" style="margin-top:16px">
+        ${emailBtn}
+        <button class="btn ${copyClass}" id="copy">Copier le tout (nom + code)</button>
+        <button class="btn btn-ghost" id="again">Recommencer</button>
+      </div>
+      ${recipient}
+      <p class="hint" id="copied"></p>
+    </div>
+    <div class="cloture">${esc(CLOTURE_MSG)}</div>
+    <p class="hint">Votre code contient uniquement vos réponses, sous forme abrégée. Aucune donnée ne part vers un serveur : tout reste sur votre appareil.</p>`;
+  app.appendChild(d);
+  document.getElementById('copy').onclick=()=>{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(block).then(done).catch(()=>fallback(block));}
+    else fallback(block);
+    function done(){document.getElementById('copied').textContent='Copié. Collez-le dans un message à votre formatrice.';}
+    function fallback(txt){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}ta.remove();}
+  };
+  document.getElementById('again').onclick=()=>{answers=new Array(45).fill(null);go(quiz);};
+}
+
+/* ---------- formatrice input ---------- */
+function restitution(){
+  app.innerHTML='';
+  const d=document.createElement('div');
+  const today=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
+  d.innerHTML=`
+    <h1>Espace formatrice</h1>
+    <p class="lead">Collez le code reçu pour générer le profil. Vous pourrez ensuite ajuster les textes avant d'imprimer ou d'enregistrer en PDF.</p>
+    <div class="card">
+      <div class="field"><label>Bloc reçu du stagiaire (nom + code)</label>
+        <textarea id="codein" placeholder="Collez ici l'ensemble reçu (nom et code)"></textarea></div>
+      <div class="field"><label>Prénom du stagiaire (facultatif)</label>
+        <input class="txt" id="namein" placeholder="Prénom"></div>
+      <div class="field"><label>Groupe (facultatif)</label>
+        <input class="txt" id="groupein" placeholder="Nom du groupe"></div>
+      <div class="field"><label>Date</label>
+        <input class="txt" id="datein" value="${today}"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="r-back">Retour</button>
+        <button class="btn btn-violet" id="r-go">Générer le profil</button>
+      </div>
+      <div id="r-err"></div>
+    </div>`;
+  app.appendChild(d);
+
+  const guide=document.createElement('div');guide.className='card no-print';
+  guide.innerHTML=`<details><summary style="cursor:pointer;font-weight:800;color:var(--violet)">Guide de restitution</summary>
+    <ul class="actions-list" style="margin-top:10px">
+      <li>Posez le cadre : un outil de prise de conscience, où chaque profil est légitime.</li>
+      <li>Commencez par les forces, puis abordez les axes de progrès.</li>
+      <li>Laissez la personne réagir à sa roue avant de commenter.</li>
+      <li>Reliez deux ou trois pistes à des situations concrètes de son travail.</li>
+      <li>Terminez sur le plan d'action : deux ou trois engagements, une échéance.</li>
+      <li>Gardez une posture d'accompagnement : l'interprétation appartient à la personne.</li>
+    </ul></details>`;
+  app.appendChild(guide);
+  document.getElementById('r-back').onclick=()=>go(home);
+  function parseAndFill(){
+    const raw=document.getElementById('codein').value;
+    const nameMatch=raw.match(/\[NOM\]\s*(.+)/i);
+    if(nameMatch){const ni=document.getElementById('namein');if(ni&&!ni.value.trim())ni.value=nameMatch[1].trim();}
+    const grpMatch=raw.match(/\[GROUPE\]\s*(.+)/i);
+    if(grpMatch){const gi=document.getElementById('groupein');if(gi&&!gi.value.trim())gi.value=grpMatch[1].trim();}
+  }
+  document.getElementById('codein').oninput=parseAndFill;
+  document.getElementById('r-go').onclick=()=>{
+    parseAndFill();
+    const raw=document.getElementById('codein').value;
+    const codeMatch=raw.match(/\[CODE\]\s*([\s\S]+)/i);
+    const codeStr=codeMatch?codeMatch[1]:raw;
+    const res=decode(codeStr);
+    if(!res){document.getElementById('r-err').innerHTML='<div class="err">Ce code semble incomplet ou erroné. Vérifiez qu\'il a été collé en entier.</div>';return;}
+    const nm=document.getElementById('namein').value.trim();
+    const dt=document.getElementById('datein').value.trim();
+    const grp=document.getElementById('groupein').value.trim();
+    go(()=>report(res.a,nm,dt,res.ctx,grp));
+  };
+}
+
+/* ---------- radar ---------- */
+function wrapLabel(name){
+  const w=name.split(' ');if(name.length<=14)return [name];
+  let l1='',l2='';for(const x of w){if((l1+' '+x).trim().length<=14&&!l2)l1=(l1+' '+x).trim();else l2=(l2+' '+x).trim();}
+  return l2?[l1,l2]:[l1];
+}
+function radarSVG(vals){
+  const cx=270,cy=248,R=158,N=5;
+  const ang=i=>(-90+i*72)*Math.PI/180;
+  const pt=(i,r)=>[cx+r*Math.cos(ang(i)),cy+r*Math.sin(ang(i))];
+  let g='';
+  [0.25,0.5,0.75,1].forEach(fr=>{
+    const p=vals.map((_,i)=>pt(i,R*fr).map(n=>n.toFixed(1)).join(',')).join(' ');
+    g+=`<polygon points="${p}" fill="${fr===1?'#fff':'none'}" stroke="#e4e0e8" stroke-width="1"/>`;
+  });
+  for(let i=0;i<N;i++){const[x,y]=pt(i,R);g+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e4e0e8" stroke-width="1"/>`;}
+  const dp=vals.map((v,i)=>pt(i,R*v.score/100).map(n=>n.toFixed(1)).join(',')).join(' ');
+  g+=`<polygon points="${dp}" fill="rgba(72,35,92,0.16)" stroke="#48235C" stroke-width="2.5" stroke-linejoin="round"/>`;
+  vals.forEach((v,i)=>{const[x,y]=pt(i,R*v.score/100);g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="#e94e1b"/>`;});
+  vals.forEach((v,i)=>{
+    const[x,y]=pt(i,R+24);
+    const anchor=Math.abs(x-cx)<6?'middle':(x>cx?'start':'end');
+    const lines=wrapLabel(v.name);
+    const up=y<cy;
+    const dy0=up?-((lines.length)*14):0;
+    let tsp=lines.map((ln,k)=>`<tspan x="${x.toFixed(1)}" dy="${k===0?dy0:14}">${esc(ln)}</tspan>`).join('');
+    g+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" font-size="13" font-weight="700" fill="#48235C">${tsp}<tspan x="${x.toFixed(1)}" dy="15" font-size="12.5" font-weight="800" fill="#e94e1b">${Math.round(v.score)}</tspan></text>`;
+  });
+  return `<svg viewBox="0 0 540 470" xmlns="http://www.w3.org/2000/svg" class="radar" role="img" aria-label="Radar des cinq dimensions">${g}</svg>`;
+}
+
+/* ---------- segmented wheel (5 dimensions x 3 composantes) ---------- */
+function hexLighten(hex,amt){
+  const c=hex.replace('#','');
+  const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);
+  const m=v=>Math.round(v+(255-v)*amt);const h=v=>v.toString(16).padStart(2,'0');
+  return '#'+h(m(r))+h(m(g))+h(m(b));
+}
+function pol(cx,cy,r,deg){const a=(deg-90)*Math.PI/180;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+function annSector(cx,cy,ri,ro,a0,a1){
+  const [xo0,yo0]=pol(cx,cy,ro,a0),[xo1,yo1]=pol(cx,cy,ro,a1);
+  const [xi1,yi1]=pol(cx,cy,ri,a1),[xi0,yi0]=pol(cx,cy,ri,a0);
+  const large=(a1-a0)>180?1:0;
+  return `M ${xo0.toFixed(2)} ${yo0.toFixed(2)} A ${ro} ${ro} 0 ${large} 1 ${xo1.toFixed(2)} ${yo1.toFixed(2)} L ${xi1.toFixed(2)} ${yi1.toFixed(2)} A ${ri} ${ri} 0 ${large} 0 ${xi0.toFixed(2)} ${yi0.toFixed(2)} Z`;
+}
+function wheelSVG(a){
+  const cx=360,cy=340,r0=58,R=148,gap=1.4;
+  let g='';
+  [0.25,0.5,0.75,1].forEach(fr=>{const r=(r0+(R-r0)*fr).toFixed(1);g+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e4e0e8" stroke-width="1"/>`;});
+  FACETS.forEach((f,gi)=>{
+    const d=Math.floor(gi/3), j=gi%3, col=SCALES[d].color;
+    const a0=gi*24+gap/2, a1=(gi+1)*24-gap/2;
+    const v=facetScore(a,f.id);
+    const rOut=r0+(R-r0)*v/100;
+    const shade=hexLighten(col, j===0?0:(j===1?0.24:0.46));
+    g+=`<path d="${annSector(cx,cy,r0,R,a0,a1)}" fill="${col}" opacity="0.08"/>`;
+    g+=`<path d="${annSector(cx,cy,r0,rOut,a0,a1)}" fill="${shade}"/>`;
+  });
+  FACETS.forEach((f,gi)=>{
+    const mid=gi*24+12;
+    const [lx,ly]=pol(cx,cy,R+7,mid);
+    const left=mid>180;
+    const rot=left?(mid+90):(mid-90);
+    const anchor=left?'end':'start';
+    g+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" transform="rotate(${rot.toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)})" text-anchor="${anchor}" font-size="9.5" font-weight="600" fill="#4a4254" dominant-baseline="central">${esc(f.name)} · ${Math.round(facetScore(a,f.id))}</text>`;
+  });
+  const gs=Math.round(globalScore(a));
+  g+=`<circle cx="${cx}" cy="${cy}" r="${r0-3}" fill="#fff" stroke="#e4e0e8" stroke-width="1"/>`;
+  g+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="32" font-weight="800" fill="#48235C">${gs}</text>`;
+  g+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="11" font-weight="700" fill="#6a6175">indice global</text>`;
+  return `<svg viewBox="0 0 720 710" xmlns="http://www.w3.org/2000/svg" class="radar" role="img" aria-label="Roue Émopreinte des composantes">${g}</svg>`;
+}
+
+/* ---------- report ---------- */
+function report(a,name,date,ctx,groupe){
+  app.innerHTML='';
+  const ctxLabel = ctx===0 ? 'Soignant·e' : 'Non soignant·e ou fonction support';
+  const scaleVals=SCALES.map(s=>({name:s.name,color:s.color,score:scaleScore(a,s.id)}));
+  const gscore=globalScore(a);
+  const facetVals=FACETS.map(f=>({f,score:facetScore(a,f.id),scale:SCALES.find(s=>s.id===f.s)})).slice();
+  const sorted=[...facetVals].sort((x,y)=>y.score-x.score);
+  const forces=sorted.slice(0,4);
+  const axes=[...sorted].reverse().slice(0,4);
+
+  const head=document.createElement('div');head.className='report-head';
+  head.innerHTML=`<div>${LOGO}</div><div class="meta">${name?`<b>${esc(name)}</b><br>`:''}${groupe?('Groupe : '+esc(groupe)+'<br>'):''}${esc(ctxLabel)}<br>Profil Émopreinte - intelligence émotionnelle<br>${esc(date||'')}</div>`;
+  app.appendChild(head);
+
+  const gb=bandFor(gscore);
+  const gl=document.createElement('div');gl.className='global';
+  gl.innerHTML=`<div><div class="num">${Math.round(gscore)}</div><div class="lbl">indice global / 100</div></div>
+    <div><div class="bd">${esc(gb)}</div><div class="lbl">Une lecture d'ensemble de votre intelligence émotionnelle, à affiner dimension par dimension.</div></div>`;
+  app.appendChild(gl);
+
+  const cr=document.createElement('div');cr.className='card';
+  cr.innerHTML=`<h2 style="margin-top:6px">Votre roue Émopreinte</h2>`+wheelSVG(a)+
+    `<div class="dim-legend">`+SCALES.map(s=>`<span class="dim-chip"><span class="sw" style="background:${s.color}"></span>${esc(s.name)} <b>${Math.round(scaleScore(a,s.id))}</b></span>`).join('')+`</div>`+
+    `<div class="wheel-cap">Chaque quartier coloré est une dimension. Les trois nuances qu'il contient, de la plus foncée à la plus claire, sont ses trois composantes, nommées sur la roue avec leur score.</div>`;
+  app.appendChild(cr);
+
+  // points génériques par dimension
+  const gen=document.createElement('div');gen.className='card';
+  gen.innerHTML=`<h2 style="margin-top:6px">Lecture par dimension</h2>`;
+  SCALES.forEach(s=>{
+    const sv=scaleScore(a,s.id);const bl=bandFor(sv);
+    const row=document.createElement('div');row.className='genrow';
+    row.innerHTML=`<div class="gh"><span class="scale-dot" style="background:${s.color}"></span>
+      <b style="color:${s.color}">${esc(s.name)}</b>
+      <span class="pill" style="background:${s.color}">${esc(bl)} · ${Math.round(sv)}</span></div>
+      <div contenteditable="true">${esc(s.desc)} ${esc(BAND_SENT[bl])}</div>`;
+    gen.appendChild(row);
+  });
+  app.appendChild(gen);
+
+  // détail 15 composantes (barres + lecture)
+  const bars=document.createElement('div');bars.className='card bars';
+  bars.innerHTML=`<h2 style="margin-top:6px">Le détail des quinze composantes</h2>`;
+  SCALES.forEach(s=>{
+    const grp=document.createElement('div');grp.className='bgroup';
+    grp.innerHTML=`<div class="bgh"><span class="scale-dot" style="background:${s.color}"></span>${esc(s.name)}</div>`;
+    FACETS.filter(f=>f.s===s.id).forEach((f,j)=>{
+      const v=facetScore(a,f.id);
+      const reading=v>=60?f.strength:f.dev;
+      const shade=hexLighten(s.color, j===0?0:(j===1?0.24:0.46));
+      const b=document.createElement('div');b.className='bar';
+      b.innerHTML=`<div class="bl"><span class="sw" style="background:${shade}"></span>${esc(f.name)} <span class="bv">${Math.round(v)} · ${esc(bandFor(v))}</span></div>
+        <div class="track"><div class="fill" style="width:${v.toFixed(0)}%;background:${shade}"></div></div>
+        <div class="hint" style="margin-top:3px" contenteditable="true">${esc(reading)}</div>`;
+      grp.appendChild(b);
+    });
+    bars.appendChild(grp);
+  });
+  app.appendChild(bars);
+
+  // forces
+  const fc=document.createElement('div');fc.className='card';
+  fc.innerHTML=`<h2 style="margin-top:6px">Vos forces</h2><p class="hint" style="margin-top:0">Les composantes sur lesquelles vous vous appuyez le plus aujourd'hui.</p>`;
+  forces.forEach(o=>{
+    const t=document.createElement('div');t.className='tag f';
+    t.innerHTML=`<span class="nm">${esc(o.f.name)} · ${Math.round(o.score)}</span><span contenteditable="true">${esc(o.f.strength)}</span>`;
+    fc.appendChild(t);
+  });
+  app.appendChild(fc);
+
+  // pistes d'action par composante (toutes), priorités mises en avant
+  const prioIds=new Set(axes.map(o=>o.f.id));
+  const pa=document.createElement('div');pa.className='card';
+  pa.innerHTML=`<h2 style="margin-top:6px">Pistes d'action par composante</h2><p class="hint" style="margin-top:0">Des actions concrètes pour chacune des quinze composantes. Celles marquées « priorité » sont les leviers les plus porteurs à ce stade.</p>`;
+  SCALES.forEach(s=>{
+    const grp=document.createElement('div');grp.className='bgroup';
+    grp.innerHTML=`<div class="bgh"><span class="scale-dot" style="background:${s.color}"></span>${esc(s.name)}</div>`;
+    FACETS.filter(f=>f.s===s.id).forEach(f=>{
+      const v=facetScore(a,f.id);const prio=prioIds.has(f.id);
+      const block=document.createElement('div');block.className='facet-act'+(prio?' prio':'');
+      const badge=prio?`<span class="prio-badge">priorité</span>`:'';
+      block.innerHTML=`<div class="fa-head"><b>${esc(f.name)}</b> <span class="bv">${Math.round(v)} · ${esc(bandFor(v))}</span>${badge}</div>`;
+      const ul=document.createElement('ul');ul.className='actions-list';
+      const acts=(ctx===0?f.actions_soin:f.actions);
+      acts.forEach(act=>{const li=document.createElement('li');li.contentEditable='true';li.textContent=act;ul.appendChild(li);});
+      block.appendChild(ul);
+      grp.appendChild(block);
+    });
+    pa.appendChild(grp);
+  });
+  app.appendChild(pa);
+
+  const plan=document.createElement('div');plan.className='card';
+  plan.innerHTML=`<h2 style="margin-top:6px">Mon plan d'action</h2><p class="hint" style="margin-top:0">Ces trois pistes sont issues de vos composantes prioritaires, celles aux scores les plus bas. Retenez-en deux ou trois et fixez une échéance. À compléter ou modifier librement.</p>`;
+  const seeds=axes.slice(0,3).map(o=>(ctx===0?o.f.actions_soin:o.f.actions)[0]);
+  for(let i=0;i<3;i++){
+    const prow=document.createElement('div');prow.className='plan-row';
+    prow.innerHTML=`<div class="plan-act" contenteditable="true" data-ph="Action retenue">${esc(seeds[i]||'')}</div>`+
+      `<div class="plan-when" contenteditable="true" data-ph="Échéance"></div>`;
+    plan.appendChild(prow);
+  }
+  app.appendChild(plan);
+
+  const row=document.createElement('div');row.className='btn-row no-print';row.style.marginTop='20px';
+  row.innerHTML=`<button class="btn btn-ghost" id="rep-back">Retour</button>
+    <button class="btn btn-primary" id="rep-print">Imprimer / Enregistrer en PDF</button>`;
+  app.appendChild(row);
+  document.getElementById('rep-back').onclick=()=>go(restitution);
+  document.getElementById('rep-print').onclick=()=>window.print();
+}
+
+if(/passer/i.test((location.hash||'')+(location.search||''))){answers=new Array(45).fill(null);go(quiz);}else{home();}
+</script>
+</body>
+</html>
