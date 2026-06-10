@@ -125,6 +125,13 @@ input.txt{font-family:inherit;font-size:15px;padding:10px 12px;border:1.5px soli
 .dim-legend{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin-top:6px}
 .dim-chip{font-size:12.5px;font-weight:700;color:var(--ink)}
 .dim-chip b{color:var(--violet)}
+.legal-footer{text-align:center;font-size:9.5px;color:#8a8295;margin-top:22px;border-top:1px solid var(--line);padding-top:8px}
+.roster-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.roster-row:last-child{border-bottom:0}
+.rn{font-weight:700;color:var(--ink)}
+.btn-sm{padding:7px 12px;font-size:13px}
+.rn-input{font-size:13px;padding:6px 8px;flex:0 1 240px;min-width:120px}
+.send-help{background:var(--gris-soft);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;color:#4a4254;line-height:1.7}
 .plan-row{display:grid;grid-template-columns:1fr 130px;gap:10px;border-bottom:1px solid var(--line);padding:9px 0;align-items:start}
 .plan-row:last-child{border-bottom:0}
 .plan-act,.plan-when{font-size:13.5px;min-height:20px}
@@ -141,6 +148,10 @@ input.txt{font-family:inherit;font-size:15px;padding:10px 12px;border:1.5px soli
   .global{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .bar .fill,.scale-dot,.pill,.tag,.prio-badge,.facet-act.prio{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .facet-act,.bgroup{break-inside:avoid}
+  .legal-footer{position:fixed;bottom:0;left:0;right:0;margin:0;padding:4px 8px;background:#fff;border-top:1px solid #e4e0e8;font-size:8.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .report-page{break-after:page}
+  .report-page:last-of-type{break-after:auto}
+  @page{margin-bottom:14mm}
 }
 </style>
 </head>
@@ -392,6 +403,7 @@ const FORMATRICE_EMAIL = "catherine.besse@speciman.fr";
 const CLOTURE_MSG = "Bonjour, vous venez de compléter votre autodiagnostic Émopreinte. À l'issue de la formation « Gérer les situations à forte charge émotionnelle », je vous adresserai votre rapport personnalisé, qui s'appuie sur les cinq dimensions de l'intelligence émotionnelle. À bientôt. Catherine Besse.";
 function getParam(n){const hay=(location.search||'')+'&'+((location.hash||'').replace(/^#/,'&'));const m=hay.match(new RegExp('[?&]'+n+'=([^&]+)'));return m?decodeURIComponent(m[1].replace(/\+/g,' ')):'';}
 let userGroupe = getParam('groupe')||getParam('g');
+const LEGAL = "Speciman - 185 rue de la Pompe - 75116 PARIS | Organisme professionnel | N° SIREN 442.223.459 | N° de TVA FR31442223459";
 
 function esc(s){return (s+'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function bandFor(score){for(const b of BANDS){if(score<=b.max)return b.label;}return BANDS[BANDS.length-1].label;}
@@ -447,10 +459,14 @@ function home(){
         <div class="ic">📊</div><b>J'ai un code à restituer</b>
         <span>Espace formatrice : collez le code reçu pour générer le profil et le rapport.</span>
       </button>
+    </div>
+    <div style="text-align:center;margin-top:18px">
+      <button class="btn btn-ghost" id="c-dash">Tableau de bord par groupe (formatrice)</button>
     </div>`;
   app.appendChild(h);
   document.getElementById('c-quiz').onclick=()=>{answers=new Array(45).fill(null);go(quiz);};
   document.getElementById('c-rest').onclick=()=>go(restitution);
+  document.getElementById('c-dash').onclick=()=>go(groupe);
 }
 
 /* ---------- quiz ---------- */
@@ -547,12 +563,10 @@ function resultCode(code, name){
   const subject='Émopreinte - résultat de '+(name||'')+(userGroupe?(' ['+userGroupe+']'):'');
   const mailto='mailto:'+encodeURIComponent(FORMATRICE_EMAIL)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(block);
   const emailBtn=hasEmail?`<a class="btn btn-primary" href="${mailto}" id="mail">Envoyer à ma formatrice</a>`:'';
-  const copyClass=hasEmail?'btn-ghost':'btn-primary';
-  const recipient=hasEmail?`<p class="hint" style="margin-top:10px">Destinataire : ${esc(FORMATRICE_EMAIL)}. Le message s'ouvre prérempli, vous n'avez plus qu'à l'envoyer.</p>`:'';
   const d=document.createElement('div');
   d.innerHTML=`
     <h1>Merci, c'est terminé</h1>
-    <p class="lead">Voici votre résultat. Transmettez l'ensemble ci-dessous à votre formatrice : elle générera votre profil et votre rapport personnalisé, qu'elle vous remettra.</p>
+    <p class="lead">Voici votre résultat à transmettre à votre formatrice. Elle générera votre profil personnalisé, qu'elle vous remettra.</p>
     <div class="card">
       <div class="field" style="margin-top:0"><label>Nom et prénom</label>
         <div style="font-weight:700;color:var(--violet)">${esc(name||'')}</div></div>
@@ -560,24 +574,27 @@ function resultCode(code, name){
         <div class="codebox" id="code">${esc(code)}</div></div>
       <div class="btn-row" style="margin-top:16px">
         ${emailBtn}
-        <button class="btn ${copyClass}" id="copy">Copier le tout (nom + code)</button>
+        <button class="btn ${hasEmail?'btn-violet':'btn-primary'}" id="copy">Copier mon résultat</button>
         <button class="btn btn-ghost" id="again">Recommencer</button>
       </div>
-      ${recipient}
-      <p class="hint" id="copied"></p>
+      <p class="hint" id="copied" style="margin-top:10px"></p>
+      ${hasEmail?`<div class="send-help"><b>Deux façons d'envoyer votre résultat :</b><br>
+        1. Le bouton « Envoyer à ma formatrice » ouvre votre messagerie déjà préremplie. Il vous reste à cliquer sur Envoyer.<br>
+        2. Si rien ne s'ouvre, par exemple avec un webmail, cliquez sur « Copier mon résultat », puis collez-le dans un nouvel e-mail adressé à <b>${esc(FORMATRICE_EMAIL)}</b>.</div>`:''}
     </div>
     <div class="cloture">${esc(CLOTURE_MSG)}</div>
     <p class="hint">Votre code contient uniquement vos réponses, sous forme abrégée. Aucune donnée ne part vers un serveur : tout reste sur votre appareil.</p>`;
   app.appendChild(d);
-  document.getElementById('copy').onclick=()=>{
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(block).then(done).catch(()=>fallback(block));}
-    else fallback(block);
-    function done(){document.getElementById('copied').textContent='Copié. Collez-le dans un message à votre formatrice.';}
-    function fallback(txt){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}ta.remove();}
-  };
+  function copyBlock(msg){
+    function done(){document.getElementById('copied').textContent=msg||('Résultat copié. Collez-le dans un e-mail à '+FORMATRICE_EMAIL+'.');}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(block).then(done).catch(fb);}
+    else fb();
+    function fb(){const ta=document.createElement('textarea');ta.value=block;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}ta.remove();}
+  }
+  document.getElementById('copy').onclick=()=>copyBlock();
+  if(hasEmail){const mailA=document.getElementById('mail');if(mailA)mailA.addEventListener('click',()=>copyBlock('Au cas où votre messagerie ne s\'ouvre pas, votre résultat est aussi copié : collez-le dans un e-mail à '+FORMATRICE_EMAIL+'.'));}
   document.getElementById('again').onclick=()=>{answers=new Array(45).fill(null);go(quiz);};
 }
-
 /* ---------- formatrice input ---------- */
 function restitution(){
   app.innerHTML='';
@@ -711,33 +728,30 @@ function wheelSVG(a){
 }
 
 /* ---------- report ---------- */
-function report(a,name,date,ctx,groupe){
-  app.innerHTML='';
+function buildReport(container,a,name,date,ctx,groupe){
   const ctxLabel = ctx===0 ? 'Soignant·e' : 'Non soignant·e ou fonction support';
-  const scaleVals=SCALES.map(s=>({name:s.name,color:s.color,score:scaleScore(a,s.id)}));
   const gscore=globalScore(a);
-  const facetVals=FACETS.map(f=>({f,score:facetScore(a,f.id),scale:SCALES.find(s=>s.id===f.s)})).slice();
+  const facetVals=FACETS.map(f=>({f,score:facetScore(a,f.id),scale:SCALES.find(s=>s.id===f.s)}));
   const sorted=[...facetVals].sort((x,y)=>y.score-x.score);
   const forces=sorted.slice(0,4);
   const axes=[...sorted].reverse().slice(0,4);
 
   const head=document.createElement('div');head.className='report-head';
   head.innerHTML=`<div>${LOGO}</div><div class="meta">${name?`<b>${esc(name)}</b><br>`:''}${groupe?('Groupe : '+esc(groupe)+'<br>'):''}${esc(ctxLabel)}<br>Profil Émopreinte - intelligence émotionnelle<br>${esc(date||'')}</div>`;
-  app.appendChild(head);
+  container.appendChild(head);
 
   const gb=bandFor(gscore);
   const gl=document.createElement('div');gl.className='global';
   gl.innerHTML=`<div><div class="num">${Math.round(gscore)}</div><div class="lbl">indice global / 100</div></div>
     <div><div class="bd">${esc(gb)}</div><div class="lbl">Une lecture d'ensemble de votre intelligence émotionnelle, à affiner dimension par dimension.</div></div>`;
-  app.appendChild(gl);
+  container.appendChild(gl);
 
   const cr=document.createElement('div');cr.className='card';
   cr.innerHTML=`<h2 style="margin-top:6px">Votre roue Émopreinte</h2>`+wheelSVG(a)+
     `<div class="dim-legend">`+SCALES.map(s=>`<span class="dim-chip"><span class="sw" style="background:${s.color}"></span>${esc(s.name)} <b>${Math.round(scaleScore(a,s.id))}</b></span>`).join('')+`</div>`+
     `<div class="wheel-cap">Chaque quartier coloré est une dimension. Les trois nuances qu'il contient, de la plus foncée à la plus claire, sont ses trois composantes, nommées sur la roue avec leur score.</div>`;
-  app.appendChild(cr);
+  container.appendChild(cr);
 
-  // points génériques par dimension
   const gen=document.createElement('div');gen.className='card';
   gen.innerHTML=`<h2 style="margin-top:6px">Lecture par dimension</h2>`;
   SCALES.forEach(s=>{
@@ -749,9 +763,8 @@ function report(a,name,date,ctx,groupe){
       <div contenteditable="true">${esc(s.desc)} ${esc(BAND_SENT[bl])}</div>`;
     gen.appendChild(row);
   });
-  app.appendChild(gen);
+  container.appendChild(gen);
 
-  // détail 15 composantes (barres + lecture)
   const bars=document.createElement('div');bars.className='card bars';
   bars.innerHTML=`<h2 style="margin-top:6px">Le détail des quinze composantes</h2>`;
   SCALES.forEach(s=>{
@@ -769,9 +782,8 @@ function report(a,name,date,ctx,groupe){
     });
     bars.appendChild(grp);
   });
-  app.appendChild(bars);
+  container.appendChild(bars);
 
-  // forces
   const fc=document.createElement('div');fc.className='card';
   fc.innerHTML=`<h2 style="margin-top:6px">Vos forces</h2><p class="hint" style="margin-top:0">Les composantes sur lesquelles vous vous appuyez le plus aujourd'hui.</p>`;
   forces.forEach(o=>{
@@ -779,9 +791,8 @@ function report(a,name,date,ctx,groupe){
     t.innerHTML=`<span class="nm">${esc(o.f.name)} · ${Math.round(o.score)}</span><span contenteditable="true">${esc(o.f.strength)}</span>`;
     fc.appendChild(t);
   });
-  app.appendChild(fc);
+  container.appendChild(fc);
 
-  // pistes d'action par composante (toutes), priorités mises en avant
   const prioIds=new Set(axes.map(o=>o.f.id));
   const pa=document.createElement('div');pa.className='card';
   pa.innerHTML=`<h2 style="margin-top:6px">Pistes d'action par composante</h2><p class="hint" style="margin-top:0">Des actions concrètes pour chacune des quinze composantes. Celles marquées « priorité » sont les leviers les plus porteurs à ce stade.</p>`;
@@ -801,7 +812,7 @@ function report(a,name,date,ctx,groupe){
     });
     pa.appendChild(grp);
   });
-  app.appendChild(pa);
+  container.appendChild(pa);
 
   const plan=document.createElement('div');plan.className='card';
   plan.innerHTML=`<h2 style="margin-top:6px">Mon plan d'action</h2><p class="hint" style="margin-top:0">Ces trois pistes sont issues de vos composantes prioritaires, celles aux scores les plus bas. Retenez-en deux ou trois et fixez une échéance. À compléter ou modifier librement.</p>`;
@@ -812,16 +823,121 @@ function report(a,name,date,ctx,groupe){
       `<div class="plan-when" contenteditable="true" data-ph="Échéance"></div>`;
     plan.appendChild(prow);
   }
-  app.appendChild(plan);
+  container.appendChild(plan);
+}
 
+function legalFooter(){const f=document.createElement('div');f.className='legal-footer';f.textContent=LEGAL;return f;}
+
+function report(a,name,date,ctx,groupe,backFn){
+  app.innerHTML='';
+  const wrap=document.createElement('div');wrap.className='report-page';
+  buildReport(wrap,a,name,date,ctx,groupe);
+  app.appendChild(wrap);
+  app.appendChild(legalFooter());
   const row=document.createElement('div');row.className='btn-row no-print';row.style.marginTop='20px';
   row.innerHTML=`<button class="btn btn-ghost" id="rep-back">Retour</button>
     <button class="btn btn-primary" id="rep-print">Imprimer / Enregistrer en PDF</button>`;
   app.appendChild(row);
-  document.getElementById('rep-back').onclick=()=>go(restitution);
+  document.getElementById('rep-back').onclick=()=>{if(backFn){backFn();}else{go(restitution);}};
   document.getElementById('rep-print').onclick=()=>window.print();
 }
 
+/* ---------- tableau de bord par groupe ---------- */
+const ROSTER_KEY='emopreinte_roster_v1';
+function loadRoster(){try{return JSON.parse(localStorage.getItem(ROSTER_KEY))||[];}catch(e){return [];}}
+function saveRoster(r){try{localStorage.setItem(ROSTER_KEY,JSON.stringify(r));}catch(e){}}
+function parseBlocks(raw){
+  const out=[];
+  const codeRe=/\[CODE\]\s*([0-9A-Za-z]{1,4}(?:-[0-9A-Za-z]{1,4})+)/g;let m;
+  while((m=codeRe.exec(raw))){
+    const before=raw.slice(0,m.index);
+    const noms=[...before.matchAll(/\[NOM\]\s*([^\n\r]+)/g)];
+    const grps=[...before.matchAll(/\[GROUPE\]\s*([^\n\r]+)/g)];
+    const dec=decode(m[1]);
+    if(dec) out.push({g:(grps.length?grps[grps.length-1][1].trim():''),nom:(noms.length?noms[noms.length-1][1].trim():''),code:m[1].toUpperCase(),ctx:dec.ctx});
+  }
+  if(out.length===0){
+    raw.split(/[\n,;]+/).forEach(line=>{const t=line.trim();if(!t)return;const dec=decode(t);if(dec)out.push({g:'',nom:'',code:t.toUpperCase(),ctx:dec.ctx});});
+  }
+  return out;
+}
+function printGroup(entries){
+  app.innerHTML='';
+  const today=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});
+  entries.forEach((e,idx)=>{
+    const dec=decode(e.code);if(!dec)return;
+    const wrap=document.createElement('div');wrap.className='report-page';if(idx>0)wrap.style.pageBreakBefore='always';
+    buildReport(wrap,dec.a,e.nom,today,dec.ctx,e.g);
+    app.appendChild(wrap);
+  });
+  app.appendChild(legalFooter());
+  const row=document.createElement('div');row.className='btn-row no-print';row.style.marginTop='20px';
+  row.innerHTML=`<button class="btn btn-ghost" id="pg-back">Retour</button>
+    <button class="btn btn-primary" id="pg-print">Imprimer / Enregistrer en PDF</button>`;
+  app.appendChild(row);
+  document.getElementById('pg-back').onclick=()=>go(groupe);
+  document.getElementById('pg-print').onclick=()=>window.print();
+}
+function groupe(){
+  app.innerHTML='';
+  const d=document.createElement('div');
+  d.innerHTML=`<h1>Tableau de bord par groupe</h1>
+    <p class="lead">Collez les blocs reçus de vos participants, en une fois ou au fil de l'eau. Ils sont mémorisés sur cet ordinateur et regroupés par session.</p>
+    <div class="card">
+      <div class="field" style="margin-top:0"><label>Blocs reçus (un ou plusieurs)</label>
+        <textarea id="rin" placeholder="Collez ici un ou plusieurs e-mails reçus (nom et code)"></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="g-back">Retour</button>
+        <button class="btn btn-violet" id="g-add">Ajouter au tableau de bord</button>
+      </div>
+      <div id="g-msg" class="hint"></div>
+    </div>`;
+  app.appendChild(d);
+  const list=document.createElement('div');app.appendChild(list);
+  function render(){
+    const r=loadRoster();list.innerHTML='';
+    if(r.length===0){list.innerHTML='<p class="hint">Aucun participant pour le moment.</p>';return;}
+    const groups={};r.forEach((e,i)=>{const k=e.g||'Sans groupe';(groups[k]=groups[k]||[]).push({e,i});});
+    Object.keys(groups).sort().forEach(gname=>{
+      const rows=groups[gname];
+      const card=document.createElement('div');card.className='card';
+      card.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(gname)}</h2><span class="hint">${rows.length} participant${rows.length>1?'s':''}</span></div>`;
+      const ul=document.createElement('div');ul.style.marginTop='10px';
+      rows.forEach(({e,i})=>{
+        const item=document.createElement('div');item.className='roster-row';
+        const nameIn=document.createElement('input');nameIn.className='txt rn-input';nameIn.value=e.nom||'';nameIn.placeholder='Nom et prénom';
+        nameIn.onchange=()=>{const cur=loadRoster();const it=cur.find(x=>x.code===e.code);if(it){it.nom=nameIn.value.trim();saveRoster(cur);}};
+        const ctxh=document.createElement('span');ctxh.className='hint';ctxh.textContent=(e.ctx===0?'Soignant·e':'Non soignant·e / support');
+        const open=document.createElement('button');open.className='btn btn-ghost btn-sm';open.style.marginLeft='auto';open.textContent='Voir le rapport';
+        open.onclick=()=>{const dec=decode(e.code);if(dec)report(dec.a,nameIn.value.trim(),new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'}),dec.ctx,e.g,()=>go(groupe));};
+        const del=document.createElement('button');del.className='btn btn-ghost btn-sm';del.textContent='×';del.title='Retirer';
+        del.onclick=()=>{const cur=loadRoster();const idx=cur.findIndex(x=>x.code===e.code);if(idx>=0){cur.splice(idx,1);saveRoster(cur);render();}};
+        item.appendChild(nameIn);item.appendChild(ctxh);item.appendChild(open);item.appendChild(del);
+        ul.appendChild(item);
+      });
+      card.appendChild(ul);
+      const pall=document.createElement('button');pall.className='btn btn-primary no-print';pall.style.marginTop='12px';pall.textContent='Imprimer tous les rapports de ce groupe';
+      pall.onclick=()=>printGroup(loadRoster().filter(x=>((x.g||'Sans groupe')===gname)));
+      card.appendChild(pall);
+      list.appendChild(card);
+    });
+    const clearBtn=document.createElement('button');clearBtn.className='btn btn-ghost no-print';clearBtn.style.marginTop='8px';clearBtn.textContent='Vider le tableau de bord';
+    clearBtn.onclick=()=>{if(confirm('Effacer tous les participants mémorisés ?')){saveRoster([]);render();}};
+    list.appendChild(clearBtn);
+  }
+  document.getElementById('g-back').onclick=()=>go(home);
+  document.getElementById('g-add').onclick=()=>{
+    const parsed=parseBlocks(document.getElementById('rin').value);
+    if(parsed.length===0){document.getElementById('g-msg').innerHTML='<span class="err">Aucun code valide détecté. Vérifiez que vous avez collé les blocs reçus.</span>';return;}
+    const cur=loadRoster();const seen=new Set(cur.map(x=>x.code));let added=0;
+    parsed.forEach(p=>{if(!seen.has(p.code)){cur.push(p);seen.add(p.code);added++;}});
+    saveRoster(cur);
+    document.getElementById('rin').value='';
+    document.getElementById('g-msg').textContent=added+' participant'+(added>1?'s':'')+' ajouté'+(added>1?'s':'')+(parsed.length-added>0?(', '+(parsed.length-added)+' déjà présent'+((parsed.length-added)>1?'s':'')):'')+'.';
+    render();
+  };
+  render();
+}
 if(/passer/i.test((location.hash||'')+(location.search||''))){answers=new Array(45).fill(null);go(quiz);}else{home();}
 </script>
 </body>
